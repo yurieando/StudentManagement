@@ -3,6 +3,7 @@ package raisetech.student.management;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,5 +36,12 @@ public class Application {
 	public void updateStudentName(String name, int age) {
 		repository.updateStudent(name, age);
 	}
+
+	@DeleteMapping("/student")
+	public void deleteStudent(String name) {
+		repository.deleteStudent(name);
+	}
+
 }
+
 
