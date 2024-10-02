@@ -1,11 +1,10 @@
-package raisetech.student.management;
+package raisetech.student.management.repository;
 
 import java.util.List;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import raisetech.student.management.Student;
+import raisetech.student.management.StudentCourse;
 
 @Mapper//Mybatisが自動で処理をしてくれるようになる
 public interface StudentRepository {
