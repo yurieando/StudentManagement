@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+   <title>受講生一覧</title>
+</head>
+<h1>受講生情報一覧</h1>
+<table border="1">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>名前</th>
+    <th>カナ名</th>
+    <th>ニックネーム</th>
+    <th>メールアドレス</th>
+    <th>住所</th>
+    <th>年齢</th>
+    <th>性別</th>
+    <th>備考</th>
+    <th>受講コース名</th>
+  </tr>
+  </thead>
+  <tbody>
+    <tr th:each="studentDetail : ${studentList}">
+    <td th:text="${studentDetail.student.nameId}">E00001</td>
+    <td th:text="${studentDetail.student.name}">山田一郎</td>
+    <td th:text="${studentDetail.student.furigana}">ヤマダイチロウ</td>
+    <td th:text="${studentDetail.student.nickname}">いち</td>
+    <td th:text="${studentDetail.student.mailAddress}">ichiro@gmail.com</td>
+    <td th:text="${studentDetail.student.address}">東京都杉並区</td>
+    <td th:text="${studentDetail.student.age}">26</td>
+    <td th:text="${studentDetail.student.gender}">male</td>
+    <td th:text="${studentDetail.student.remark}"></td>
+    <td th:text="${studentDetail.studentsCourses[0].course}">Java</td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

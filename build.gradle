@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
 	id 'war'
-	id 'org.springframework.boot' version '3.3.3'
+	id 'org.springframework.boot' version '3.1.2'
 	id 'io.spring.dependency-management' version '1.1.6'
 }
 
@@ -10,7 +10,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(22)
+		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
 
@@ -24,12 +24,15 @@ repositories {
 }
 
 dependencies {
+	//Spring Boot
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	//thymeleaf
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	//便利機能、ユーティリティ
 	implementation 'org.apache.commons:commons-lang3:3.17.0'
 	//Lombok
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
+	compileOnly 'org.projectlombok:lombok:1.18.30'  // 最新のLombokバージョンを使用
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
 	//MySQLドライバ
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	//MyBatis（Maven　repositoryから取得できる）
@@ -43,4 +46,3 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
-
