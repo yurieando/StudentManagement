@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.student.management.controller.converter.StudentConverter;
@@ -39,9 +40,11 @@ public class StudentController {
     return "studentList";
   }
 
-  @GetMapping("/courseList")
-  public List<StudentsCourses> getCourseList() {
-    return service.searchCourseList();
+  @GetMapping("/student/{nameId}")
+  public String getStudent(@PathVariable String nameId, Model model) {
+    StudentDetail studentDetail = service.searchStudent(nameId);
+    model.addAttribute("studentDetail", studentDetail);
+    return "updateStudent";
   }
 
   @GetMapping("/newStudent")
@@ -62,4 +65,12 @@ public class StudentController {
     return "redirect:/studentList";
   }
 
+  @PostMapping("/updateStudent")
+  public String updateStudent(@ModelAttribute StudentDetail studentDetail, BindingResult result) {
+    if (result.hasErrors()) {
+      return "updateStudent";
+    }
+    service.updateStudent(studentDetail);
+    return "redirect:/studentList";
+  }
 }
