@@ -27,6 +27,15 @@ public class StudentService {
     return repository.search();
   }
 
+  public StudentDetail searchStudent(String nameId) {
+    Student student = repository.searchStudent(nameId);
+    List<StudentsCourses> studentsCourses = repository.searchStudentsCourses(student.getNameId());
+    StudentDetail studentDetail = new StudentDetail();
+    studentDetail.setStudent(student);
+    studentDetail.setStudentsCourses(studentsCourses);
+    return studentDetail;
+  }
+
   public List<StudentsCourses> searchCourseList() {
     return repository.searchCourse();
   }
@@ -39,6 +48,15 @@ public class StudentService {
       studentsCourses.setStartDate(LocalDate.now());
       studentsCourses.setDeadline(LocalDate.now().plusYears(1));
       repository.registerStudentsCourses(studentsCourses);
+    }
+  }
+
+  @Transactional
+  public void updateStudent(StudentDetail studentDetail) {
+    repository.updateStudent(studentDetail.getStudent());
+    for (StudentsCourses studentsCourses : studentDetail.getStudentsCourses()) {
+      studentsCourses.setNameId(studentDetail.getStudent().getNameId());
+      repository.updateStudentsCourses(studentsCourses);
     }
   }
 }
