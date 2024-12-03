@@ -1,9 +1,12 @@
 package raisetech.student.management.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.Arrays;
 import java.util.List;
+import jdk.jshell.spi.ExecutionControl.RunException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import raisetech.student.management.controller.ExcepionHandler.TestException;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
 import raisetech.student.management.service.StudentService;
@@ -52,7 +56,8 @@ public class StudentController {
     * @return 受講生詳細
    */
   @GetMapping("/student/{nameId}")
-  public StudentDetail getStudent(@PathVariable @Size(min = 1, max = 3) String nameId) {
+  public StudentDetail getStudent(
+      @PathVariable @NotBlank @Pattern(regexp = "^\\d+$") String nameId) {
     return service.searchStudent(nameId);
   }
 
@@ -87,5 +92,10 @@ public class StudentController {
   public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail) {
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");
+  }
+
+  @GetMapping("/testException")
+  public void testException() throws TestException {
+    throw new TestException("テスト用の例外です。");
   }
 }
