@@ -1,5 +1,7 @@
 package raisetech.student.management.controller;
 
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -9,6 +11,7 @@ import java.util.List;
 import jdk.jshell.spi.ExecutionControl.RunException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,57 +46,34 @@ public class StudentController {
    * 全件検索を行うので、条件指定は行いません。
    * @return　受講生一覧（全件）
    */
+  @Operation(summary = "受講生一覧の検索", description = "受講生一覧を全件検索します。")
   @GetMapping("/studentList")
   public List<StudentDetail> getStudentList() {
     return service.searchStudentList();
   }
 
-  /*
-    * 受講生詳細の検索です。
-    * IDに紐づく任意の受講生の情報を取得します。
-    *
-    * @param nameId 受講生ID
-    * @return 受講生詳細
-   */
+  @Operation(summary = "IDによる受講生検索", description = "受講生をIDから個別検索します。")
   @GetMapping("/student/{nameId}")
   public StudentDetail getStudent(
       @PathVariable @NotBlank @Pattern(regexp = "^\\d+$") String nameId) {
     return service.searchStudent(nameId);
   }
 
-  @GetMapping("/newStudent")
-  public String newStudent(Model model) {
-    StudentDetail studentDetail = new StudentDetail();
-    studentDetail.setStudentCourseList(Arrays.asList(new StudentCourse()));
-    model.addAttribute("studentDetail", studentDetail);
-    return "registerStudent";
-  }
-
-  /*
-    * 受講生詳細の登録です。
-    * 受講生情報と受講生コース情報を登録します。
-    *
-    * @param studentDetail 受講生情報
-    * @return　実行結果
-   */
-  @PostMapping("/registerStudent")
-  public ResponseEntity<StudentDetail> registerStudent(@RequestBody @Valid StudentDetail studentDetail) {
+  @Operation(summary = "受講生詳細の新規登録", description = "受講生詳細を新しく登録します。")@PostMapping("/registerStudent")
+  public ResponseEntity<StudentDetail> registerStudent(
+      @RequestBody @Valid StudentDetail studentDetail) {
     StudentDetail responsStudentDetail = service.registerStudent(studentDetail);
     return ResponseEntity.ok(responsStudentDetail);
     }
-/*
-  * 受講生詳細の更新です。
-  * キャンセルフラグの更新もここで行います。（論理削除）
-  *
-  * @param studentDetail 受講生詳細
-  * @return 実行結果
- */
+
+  @Operation(summary = "受講生詳細の更新", description = "受講生詳細の更新です。キャンセルフラグの更新もここで行います。")
   @PutMapping("/updateStudent")
   public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail) {
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");
   }
 
+  @Operation(summary = "テスト用例外", description = "例外を発生させます。")
   @GetMapping("/testException")
   public void testException() throws TestException {
     throw new TestException("テスト用の例外です。");

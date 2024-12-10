@@ -29,6 +29,9 @@ dependencies {
 	//thymeleaf
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	//OpenAPI generator
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 	//便利機能、ユーティリティ
 	implementation 'org.apache.commons:commons-lang3:3.17.0'
 	//Lombok
