@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,8 +50,11 @@ class StudentServiceTest {
     //事前準備
     List<Student> studentList = new ArrayList<>();
     List<StudentCourse> studentCourseList = new ArrayList<>();
+    List<StudentDetail> expectedStudentDetails = new ArrayList<>();
+
     when(repository.search()).thenReturn(studentList);
     when(repository.searchStudentCourseList()).thenReturn(studentCourseList);
+    when(converter.convertStudentDetails(studentList, studentCourseList)).thenReturn(expectedStudentDetails);
 
     //実行
     List<StudentDetail> actual = sut.searchStudentList();
@@ -59,15 +63,28 @@ class StudentServiceTest {
     verify(repository, times(1)).search();
     verify(repository, times(1)).searchStudentCourseList();
     verify(converter, times(1)).convertStudentDetails(studentList, studentCourseList);
+    assertEquals(expectedStudentDetails, actual);
     //後処理（変更を加えた場合ここで元に戻す）
   }
 
   @Test
   void 受講生詳細の検索_個別の受講生詳細を呼び出せていること() {
-    String nameId = "1";
+    String nameId = "テストID";
     Student student = new Student();
     student.setNameId(nameId);
+    student.setName("氏名");
+    student.setFurigana("シメイ");
+    student.setNickname("ニックネーム");
+    student.setMailAddress("test@mail.com");
+    student.setAddress("住所");
+    student.setAge(20);
+    student.setGender("male");
+    student.setRemark("");
+
     List<StudentCourse> studentCourseList = new ArrayList<>();
+    StudentCourse course1 = new StudentCourse();
+    course1.setCourse("Java");
+    studentCourseList.add(course1);
 
     when(repository.searchStudent(nameId)).thenReturn(student);
     when(repository.searchStudentCourse(student.getNameId())).thenReturn(studentCourseList);
@@ -78,8 +95,9 @@ class StudentServiceTest {
 
     verify(repository, times(1)).searchStudent(nameId);
     verify(repository, times(1)).searchStudentCourse(student.getNameId());
-    assertEquals(expected.getStudent().getNameId(), actual.getStudent().getNameId());
-    assertEquals(expected.getStudentCourseList().size(), actual.getStudentCourseList().size());
+
+    boolean isEqual = EqualsBuilder.reflectionEquals(expected, actual);
+    assertTrue(isEqual);
   }
 
   @Test
@@ -97,7 +115,7 @@ class StudentServiceTest {
 
   @Test
   void 受講生詳細の更新ができていること() {
-    String nameId = "1";
+    String nameId = "テストID";
     Student student = new Student();
     student.setNameId(nameId);
     StudentCourse studentCourse = new StudentCourse();
