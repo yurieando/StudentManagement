@@ -82,9 +82,9 @@ class StudentServiceTest {
     student.setRemark("");
 
     List<StudentCourse> studentCourseList = new ArrayList<>();
-    StudentCourse course1 = new StudentCourse();
-    course1.setCourse("Java");
-    studentCourseList.add(course1);
+    StudentCourse testCourse = new StudentCourse();
+    testCourse.setCourse("Java");
+    studentCourseList.add(testCourse);
 
     when(repository.searchStudent(nameId)).thenReturn(student);
     when(repository.searchStudentCourse(student.getNameId())).thenReturn(studentCourseList);
@@ -96,8 +96,7 @@ class StudentServiceTest {
     verify(repository, times(1)).searchStudent(nameId);
     verify(repository, times(1)).searchStudentCourse(student.getNameId());
 
-    boolean isEqual = EqualsBuilder.reflectionEquals(expected, actual);
-    assertTrue(isEqual);
+    assertEquals(expected, actual);
   }
 
   @Test
