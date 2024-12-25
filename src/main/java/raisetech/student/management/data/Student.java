@@ -15,16 +15,13 @@ import lombok.Setter;
 @Setter
 public class Student {
 
-  @NotBlank
-  @Pattern(regexp = "^\\d+$", message = "数値のみ入力してください。")
-  private String nameId;
+   private String nameId;
 
   @NotBlank(message = "入力必須です。")
   private String name;
 
   @NotBlank(message = "入力必須です。")
-  @Pattern(regexp = "^[ァ-ンヴー]+$", message = "ふりがなはカタカナで入力してください")
-
+  @Pattern(regexp = "^[ァ-ンヴー]+$", message = "フリガナはカタカナで入力してください。")
   private String furigana;
 
   private String nickname;

@@ -85,6 +85,8 @@ void registerStudentCourse(StudentCourse studentCourse);
    */
   @Update("UPDATE students_courses SET course = #{course} WHERE name_id = #{nameId}")
   void updateStudentCourse(StudentCourse studentCourse);
+
+  boolean existsById(String studentId);
 }
 
 
