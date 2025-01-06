@@ -47,7 +47,7 @@ class StudentControllerTest {
 
 
   @Test
-  void 受講生詳細一覧検索_正常系_実行できてからのリストが返ってくること() throws Exception {
+  void 受講生詳細一覧検索_正常系_検索および全件取得が実行できること() throws Exception {
     mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk());
 
@@ -73,89 +73,89 @@ class StudentControllerTest {
     verify(service, times(0)).searchStudent(any());
   }
 
-@Test
-void 受講生登録_正常系_入力値に誤りがなかった場合正常に登録が実行できること() throws Exception {
-  String requestBody = """
-    {
-        "student": {
-            "name": "テスト名",
-            "furigana": "テストメイ",
-            "nickname": "てすと",
-            "mailAddress": "test@email.com",
-            "address": "東京",
-            "age": 20,
-            "gender": "男性",
-            "remark": ""
-        },
-        "studentCourseList": [
-            {
-                "courseName": "Java"
-            }
-        ]
-    }
-    """;
+  @Test
+  void 受講生登録_正常系_入力値に誤りがなかった場合正常に登録が実行できること() throws Exception {
+    String requestBody = """
+        {
+            "student": {
+                "name": "テスト名",
+                "furigana": "テストメイ",
+                "nickname": "てすと",
+                "mailAddress": "test@email.com",
+                "address": "東京",
+                "age": 20,
+                "gender": "男性",
+                "remark": ""
+            },
+            "studentCourseList": [
+                {
+                    "courseName": "Java"
+                }
+            ]
+        }
+        """;
 
-  mockMvc.perform(post("/registerStudent")
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(requestBody))
-      .andExpect(status().isOk());
+    mockMvc.perform(post("/registerStudent")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(requestBody))
+        .andExpect(status().isOk());
 
-  verify(service, times(1)).registerStudent(any());
-}
-
-    @Test
-  void 受講生登録_異常系_名前の入力漏れがあった場合にエラーが表示されること() throws Exception {
-      String requestBody = """
-    {
-        "student": {
-            "name": "",
-            "furigana": "テストメイ",
-            "nickname": "てすと",
-            "mailAddress": "test@email.com",
-            "address": "東京",
-            "age": 20,
-            "gender": "男性",
-            "remark": ""
-        },
-        "studentCourseList": [
-            {
-                "courseName": "Java"
-            }
-        ]
-    }
-    """;
-
-      mockMvc.perform(post("/registerStudent")
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(requestBody))
-          .andExpect(status().isBadRequest())
-          .andExpect(content().string("student.name: 入力必須です。"));
-
-
-      verify(service, times(0)).registerStudent(any());
-    }
+    verify(service, times(1)).registerStudent(any());
+  }
 
   @Test
-  void 受講生登録_異常系_furiganaにカタカナ以外が入力された場合にエラーが表示されること() throws Exception {
+  void 受講生登録_異常系_名前の入力漏れがあった場合にエラーが表示されること() throws Exception {
     String requestBody = """
-    {
-        "student": {
-            "name": "テスト名",
-            "furigana": "test",
-            "nickname": "てすと",
-            "mailAddress": "test@email.com",
-            "address": "東京",
-            "age": 20,
-            "gender": "男性",
-            "remark": ""
-        },
-        "studentCourseList": [
-            {
-                "courseName": "Java"
-            }
-        ]
-    }
-    """;
+        {
+            "student": {
+                "name": "",
+                "furigana": "テストメイ",
+                "nickname": "てすと",
+                "mailAddress": "test@email.com",
+                "address": "東京",
+                "age": 20,
+                "gender": "男性",
+                "remark": ""
+            },
+            "studentCourseList": [
+                {
+                    "courseName": "Java"
+                }
+            ]
+        }
+        """;
+
+    mockMvc.perform(post("/registerStudent")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(requestBody))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("student.name: 入力必須です。"));
+
+    verify(service, times(0)).registerStudent(any());
+  }
+
+  @Test
+  void 受講生登録_異常系_furiganaにカタカナ以外が入力された場合にエラーが表示されること()
+      throws Exception {
+    String requestBody = """
+        {
+            "student": {
+                "name": "テスト名",
+                "furigana": "test",
+                "nickname": "てすと",
+                "mailAddress": "test@email.com",
+                "address": "東京",
+                "age": 20,
+                "gender": "男性",
+                "remark": ""
+            },
+            "studentCourseList": [
+                {
+                    "courseName": "Java"
+                }
+            ]
+        }
+        """;
 
     mockMvc.perform(post("/registerStudent")
             .contentType(MediaType.APPLICATION_JSON)
@@ -163,32 +163,32 @@ void 受講生登録_正常系_入力値に誤りがなかった場合正常に�
         .andExpect(status().isBadRequest())
         .andExpect(content().string("student.furigana: フリガナはカタカナで入力してください。"));
 
-
     verify(service, times(0)).registerStudent(any());
   }
 
 
   @Test
-  void 受講生登録_異常系_メールアドレスの入力が不正な場合にエラーが表示されること() throws Exception {
+  void 受講生登録_異常系_メールアドレスの入力が不正な場合にエラーが表示されること()
+      throws Exception {
     String requestBody = """
-    {
-        "student": {
-            "name": "テスト名",
-            "furigana": "テストメイ",
-            "nickname": "てすと",
-            "mailAddress": "testmail",
-            "address": "東京",
-            "age": 20,
-            "gender": "男性",
-            "remark": ""
-        },
-        "studentCourseList": [
-            {
-                "courseName": "Java"
-            }
-        ]
-    }
-    """;
+        {
+            "student": {
+                "name": "テスト名",
+                "furigana": "テストメイ",
+                "nickname": "てすと",
+                "mailAddress": "testmail",
+                "address": "東京",
+                "age": 20,
+                "gender": "男性",
+                "remark": ""
+            },
+            "studentCourseList": [
+                {
+                    "courseName": "Java"
+                }
+            ]
+        }
+        """;
 
     mockMvc.perform(post("/registerStudent")
             .contentType(MediaType.APPLICATION_JSON)
@@ -196,35 +196,34 @@ void 受講生登録_正常系_入力値に誤りがなかった場合正常に�
         .andExpect(status().isBadRequest())
         .andExpect(content().string("student.mailAddress: メールアドレスの形式が不正です。"));
 
-
     verify(service, times(0)).registerStudent(any());
   }
 
   @Test
   void 受講生詳細更新_正常系_入力値が全て正しい場合に正常に更新が実行できること() throws Exception {
     String requestBody = """
-    {
-        "student": {
-            "name": "テスト名",
-            "furigana": "テストメイ",
-            "nickname": "てすと",
-            "mailAddress": "test@email.com",
-            "address": "東京",
-            "age": 20,
-            "gender": "男性",
-            "remark": ""
-        },
-        "studentCourseList": [
-            {
-                "courseId" : "99",
-                "nameId" : "99",
-                "courseName": "Java",
-                "startDate" : "2024-01-01T11:11:11.123456",
-                "deadline" : "2024-01-01T11:11:11.123456"
-            }
-        ]
-    }
-    """;
+        {
+            "student": {
+                "name": "テスト名",
+                "furigana": "テストメイ",
+                "nickname": "てすと",
+                "mailAddress": "test@email.com",
+                "address": "東京",
+                "age": 20,
+                "gender": "男性",
+                "remark": ""
+            },
+            "studentCourseList": [
+                {
+                    "courseId" : "99",
+                    "nameId" : "99",
+                    "courseName": "Java",
+                    "startDate" : "2024-01-01T11:11:11.123456",
+                    "deadline" : "2024-01-01T11:11:11.123456"
+                }
+            ]
+        }
+        """;
 
     mockMvc.perform(put("/updateStudent")
             .contentType(MediaType.APPLICATION_JSON)
