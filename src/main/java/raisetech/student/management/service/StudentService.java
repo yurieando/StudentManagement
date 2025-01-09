@@ -87,10 +87,11 @@ public class StudentService {
   *
   * @param studentDetail 受講生詳細
  */
-  @Transactional
-  public void updateStudent(StudentDetail studentDetail) {
-    repository.updateStudent(studentDetail.getStudent());
-    studentDetail.getStudentCourseList()
-        .forEach(studentCourse -> repository.updateStudentCourse(studentCourse));
+@Transactional
+public StudentDetail updateStudent(StudentDetail studentDetail) {
+  String studentId = studentDetail.getStudent().getNameId();
+  repository.updateStudent(studentDetail.getStudent());
+  studentDetail.getStudentCourseList().forEach(studentCourse -> repository.updateStudentCourse(studentCourse));
+  return studentDetail;
   }
 }

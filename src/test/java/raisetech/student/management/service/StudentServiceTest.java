@@ -54,7 +54,8 @@ class StudentServiceTest {
 
     when(repository.search()).thenReturn(studentList);
     when(repository.searchStudentCourseList()).thenReturn(studentCourseList);
-    when(converter.convertStudentDetails(studentList, studentCourseList)).thenReturn(expectedStudentDetails);
+    when(converter.convertStudentDetails(studentList, studentCourseList)).thenReturn(
+        expectedStudentDetails);
 
     //実行
     List<StudentDetail> actual = sut.searchStudentList();
@@ -100,7 +101,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の新規登録_受講生の情報の情報を登録できていること() {
+  void 受講生詳細の新規登録_登録処理のリポジトリを適切な回数呼び出せていること() {
     Student student = new Student();
     StudentCourse studentCourse = new StudentCourse();
     List<StudentCourse> studentCourseList = List.of(studentCourse);
@@ -113,7 +114,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の更新ができていること() {
+  void 受講生詳細の更新_更新処理のリポジトリを適切な回数呼び出せていること() {
     String nameId = "テストID";
     Student student = new Student();
     student.setNameId(nameId);
