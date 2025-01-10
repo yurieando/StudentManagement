@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -71,20 +72,12 @@ class StudentServiceTest {
   @Test
   void 受講生詳細の検索_個別の受講生詳細を呼び出せていること() {
     String nameId = "テストID";
-    Student student = new Student();
-    student.setNameId(nameId);
-    student.setName("氏名");
-    student.setFurigana("シメイ");
-    student.setNickname("ニックネーム");
-    student.setMailAddress("test@mail.com");
-    student.setAddress("住所");
-    student.setAge(20);
-    student.setGender("male");
-    student.setRemark("");
+    Student student = new Student(nameId, "氏名", "シメイ", "ニックネーム", "test@mail.com",
+        "住所", 20, "male", "", false);
 
     List<StudentCourse> studentCourseList = new ArrayList<>();
-    StudentCourse testCourse = new StudentCourse();
-    testCourse.setCourse("Java");
+    StudentCourse testCourse = new StudentCourse("1", nameId, "Java", LocalDate.now(),
+        LocalDate.now().plusYears(1));
     studentCourseList.add(testCourse);
 
     when(repository.searchStudent(nameId)).thenReturn(student);
@@ -102,8 +95,10 @@ class StudentServiceTest {
 
   @Test
   void 受講生詳細の新規登録_登録処理のリポジトリを適切な回数呼び出せていること() {
-    Student student = new Student();
-    StudentCourse studentCourse = new StudentCourse();
+    Student student = new Student("1", "氏名", "シメイ", "ニックネーム", "test@mail.com",
+        "住所", 20, "male", "", false);
+    StudentCourse studentCourse = new StudentCourse("1", "1", "Java", LocalDate.now(),
+        LocalDate.now().plusYears(1));
     List<StudentCourse> studentCourseList = List.of(studentCourse);
     StudentDetail studentDetail = new StudentDetail(student, studentCourseList);
 
@@ -116,9 +111,11 @@ class StudentServiceTest {
   @Test
   void 受講生詳細の更新_更新処理のリポジトリを適切な回数呼び出せていること() {
     String nameId = "テストID";
-    Student student = new Student();
-    student.setNameId(nameId);
-    StudentCourse studentCourse = new StudentCourse();
+    Student student = new Student(nameId, "氏名", "シメイ", "ニックネーム", "test@mail.com",
+        "住所", 20, "male", "", false);
+
+    StudentCourse studentCourse = new StudentCourse("1", nameId, "Java", LocalDate.now(),
+        LocalDate.now().plusYears(1));
     List<StudentCourse> studentCourseList = new ArrayList<>();
     StudentDetail studentDetail = new StudentDetail(student, studentCourseList);
 
