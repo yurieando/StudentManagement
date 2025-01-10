@@ -30,27 +30,13 @@ public class StudentConverterTest {
   @Test
   void 生徒情報とコース情報を結合したリストが生成できていること() {
     List<Student> studentList = new ArrayList<>();
-    Student testStudent = new Student();
-    testStudent.setNameId("1");
-    testStudent.setName("テスト名");
-    testStudent.setFurigana("テストフリガナ");
-    testStudent.setNickname("テストニックネーム");
-    testStudent.setMailAddress("test@email.com");
-    testStudent.setAddress("東京");
-    testStudent.setAge(20);
-    testStudent.setGender("男性");
-    testStudent.setRemark("");
-    testStudent.setDeleted(false);
-
+    Student testStudent = new Student("1", "テスト名", "テストフリガナ", "テストニックネーム"
+        , "test@email.com", "東京", 20, "男性", "", false);
     studentList.add(testStudent);
 
     List<StudentCourse> studentCourseList = new ArrayList<>();
-    StudentCourse testStudentCourse = new StudentCourse();
-    testStudentCourse.setCourseId("1");
-    testStudentCourse.setNameId("1");
-    testStudentCourse.setCourse("Java");
-    testStudentCourse.setStartDate(LocalDate.now());
-    testStudentCourse.setDeadline(LocalDate.now().plusYears(1));
+    StudentCourse testStudentCourse = new StudentCourse("1", "1", "Java", LocalDate.now(),
+        LocalDate.now().plusYears(1));
     studentCourseList.add(testStudentCourse);
 
     List<StudentDetail> expectedStudentDetails = new ArrayList<>();
@@ -69,27 +55,13 @@ public class StudentConverterTest {
   @Test
   void 生徒情報とnameIdが紐づかないコース情報はリストから除外されること() {
     List<Student> studentList = new ArrayList<>();
-    Student testStudent = new Student();
-    testStudent.setNameId("1");
-    testStudent.setName("テスト名");
-    testStudent.setFurigana("テストフリガナ");
-    testStudent.setNickname("テストニックネーム");
-    testStudent.setMailAddress("test@email.com");
-    testStudent.setAddress("東京");
-    testStudent.setAge(20);
-    testStudent.setGender("男性");
-    testStudent.setRemark("");
-    testStudent.setDeleted(false);
-
+    Student testStudent = new Student("1", "テスト名", "テストフリガナ", "テストニックネーム"
+        , "test@email.com", "東京", 20, "男性", "", false);
     studentList.add(testStudent);
 
     List<StudentCourse> studentCourseList = new ArrayList<>();
-    StudentCourse testStudentCourse = new StudentCourse();
-    testStudentCourse.setCourseId("1");
-    testStudentCourse.setNameId("99");
-    testStudentCourse.setCourse("Java");
-    testStudentCourse.setStartDate(LocalDate.now());
-    testStudentCourse.setDeadline(LocalDate.now().plusYears(1));
+    StudentCourse testStudentCourse = new StudentCourse("1", "99", "Java", LocalDate.now(),
+        LocalDate.now().plusYears(1));
     studentCourseList.add(testStudentCourse);
 
     List<StudentDetail> expectedStudentDetails = new ArrayList<>();
