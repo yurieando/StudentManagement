@@ -3,11 +3,13 @@ package raisetech.student.management.domain;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import raisetech.student.management.data.ApplicationStatus;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 
@@ -25,18 +27,25 @@ public class StudentDetail {
   @Valid
   private List<StudentCourse> studentCourseList;
 
+  @Valid
+  private Map<String, String> applicationStatusMap;
+
   @Override
   public boolean equals(Object other) {
-    if (this == other) return true;
-    if (other == null || getClass() != other.getClass()) return false;
+    if (this == other) {
+      return true;
+    }
+    if (other == null || getClass() != other.getClass()) {
+      return false;
+    }
     StudentDetail that = (StudentDetail) other;
     return Objects.equals(student, that.student) &&
-        Objects.equals(studentCourseList, that.studentCourseList);
+        Objects.equals(studentCourseList, that.studentCourseList)
+        && Objects.equals(applicationStatusMap, that.applicationStatusMap);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(student, studentCourseList);
+    return Objects.hash(student, studentCourseList, applicationStatusMap);
   }
-
 }
