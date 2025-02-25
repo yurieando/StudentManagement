@@ -32,6 +32,9 @@ public class StudentConverter {
 
     List<StudentDetail> studentDetails = new ArrayList<>();
 
+    // applicationStatusMap の中身を表示
+    System.out.println("Application Status Map: " + applicationStatusMap);
+
     studentList.forEach(student -> {
       StudentDetail studentDetail = new StudentDetail();
       studentDetail.setStudent(student);
@@ -43,13 +46,16 @@ public class StudentConverter {
 
       Map<String, String> convertApplicationStatusMap = new HashMap<>();
       for (StudentCourse course : convertStudentCourseList) {
+        // 各 Course ID を表示
+        System.out.println("Course ID: " + course.getCourseId());
+
+        // applicationStatusMap から値を取得して表示
         String status = applicationStatusMap.get(course.getCourseId());
-        if (status != null) {
-          convertApplicationStatusMap.put(course.getCourseId(), status);
-        } else {
-          convertApplicationStatusMap.put(course.getCourseId(), "未申込");
-        }
+        System.out.println("Status for Course ID " + course.getCourseId() + ": " + status);
+
+        convertApplicationStatusMap.put(course.getCourseId(), status);
       }
+
       studentDetail.setApplicationStatusMap(convertApplicationStatusMap);
       studentDetails.add(studentDetail);
     });
