@@ -20,15 +20,15 @@ public class StudentConverter {
   /**
    * 受講生情報と受講生コース情報を結合します。 受講生コース上hじょうは受講生に対して複数存在するので、ループを回して受講生詳細情報を組み立てる。
    *
-   * @param studentList          受講生一覧
-   * @param studentCourseList    受講生コース情報一覧
-   * @param applicationStatusMap 受講状況一覧
+   * @param studentList           受講生一覧
+   * @param studentCourseList     受講生コース情報一覧
+   * @param applicationStatusList 受講状況一覧
    * @return 受講生詳細情報一覧
    */
   public List<StudentDetail> convertStudentDetails(
       List<Student> studentList,
       List<StudentCourse> studentCourseList,
-      Map<String, String> applicationStatusMap) {
+      List<ApplicationStatus> applicationStatusList) {
 
     List<StudentDetail> studentDetails = new ArrayList<>();
 
@@ -41,16 +41,12 @@ public class StudentConverter {
           .collect(Collectors.toList());
       studentDetail.setStudentCourseList(convertStudentCourseList);
 
-      Map<String, String> convertApplicationStatusMap = new HashMap<>();
-      for (StudentCourse course : convertStudentCourseList) {
-        String status = applicationStatusMap.get(course.getCourseId());
-        if (status != null) {
-          convertApplicationStatusMap.put(course.getCourseId(), status);
-        } else {
-          convertApplicationStatusMap.put(course.getCourseId(), "未申込");
-        }
-      }
-      studentDetail.setApplicationStatusMap(convertApplicationStatusMap);
+      List<ApplicationStatus> convertApplicationStatusList = applicationStatusList.stream()
+          .filter(applicationStatus -> convertStudentCourseList.stream()
+              .anyMatch(studentCourse -> studentCourse.getCourseId()
+                  .equals(applicationStatus.getCourseId())))
+          .collect(Collectors.toList());
+      studentDetail.setApplicationStatusList(convertApplicationStatusList);
       studentDetails.add(studentDetail);
     });
     return studentDetails;

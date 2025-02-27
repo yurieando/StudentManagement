@@ -50,9 +50,8 @@ public interface StudentRepository {
    *
    * @return 受講状況（全件）
    */
-  @Select("SELECT course_id, CAST(application_status AS CHAR) AS applicationStatus FROM application_status WHERE course_id = #{courseId}")
-  @MapKey("course_id")
-  Map<String, String> searchApplicationStatusMap();
+  @Select("SELECT * FROM application_status")
+  List<ApplicationStatus> searchApplicationStatusList();
 
 
   /**

@@ -36,11 +36,11 @@ public class StudentService {
   public List<StudentDetail> searchStudentList() {
     List<Student> studentList = repository.search();
     List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
-    Map<String, String> applicationStatusMap = repository.searchApplicationStatusMap();
+    List<ApplicationStatus> applicationStatusList = repository.searchApplicationStatusList();
 
-    return converter.convertStudentDetails(studentList, studentCourseList, applicationStatusMap);
+    return converter.convertStudentDetails(studentList, studentCourseList, applicationStatusList);
   }
-  
+
   /**
    * 受講生詳細の検索です。 IDに紐づく任意の受講生の情報を取得した後、その受講生に紐づく受講生コース情報を取得して設定します。
    *
@@ -50,8 +50,8 @@ public class StudentService {
   public StudentDetail searchStudent(String nameId) {
     Student student = repository.searchStudent(nameId);
     List<StudentCourse> studentCourseList = repository.searchStudentCourse(student.getNameId());
-    Map<String, String> applicationStatusMap = repository.searchApplicationStatusMap();
-    return new StudentDetail(student, studentCourseList, applicationStatusMap);
+    List<ApplicationStatus> applicationStatusList = repository.searchApplicationStatusList();
+    return new StudentDetail(student, studentCourseList, applicationStatusList);
   }
 
   /**

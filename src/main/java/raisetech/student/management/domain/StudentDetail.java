@@ -28,7 +28,7 @@ public class StudentDetail {
   private List<StudentCourse> studentCourseList;
 
   @Valid
-  private Map<String, String> applicationStatusMap;
+  private List<ApplicationStatus> applicationStatusList;
 
   @Override
   public boolean equals(Object other) {
@@ -41,11 +41,11 @@ public class StudentDetail {
     StudentDetail that = (StudentDetail) other;
     return Objects.equals(student, that.student) &&
         Objects.equals(studentCourseList, that.studentCourseList)
-        && Objects.equals(applicationStatusMap, that.applicationStatusMap);
+        && Objects.equals(applicationStatusList, that.applicationStatusList);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(student, studentCourseList, applicationStatusMap);
+    return Objects.hash(student, studentCourseList, applicationStatusList);
   }
 }
