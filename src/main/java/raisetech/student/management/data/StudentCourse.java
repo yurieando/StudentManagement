@@ -10,18 +10,30 @@ import lombok.Setter;
 @Getter
 @Setter
 public class StudentCourse {
+
   private String courseId;
   private String nameId;
   private String course;
   private LocalDate startDate;
   private LocalDate deadline;
 
+  public StudentCourse(String courseId, String nameId, String course, LocalDate startDate,
+      LocalDate deadline) {
+    this.courseId = courseId;
+    this.nameId = nameId;
+    this.course = course;
+    this.startDate = startDate;
+    this.deadline = deadline;
+  }
+
   @Override
   public boolean equals(Object other) {
-    if (this == other)
+    if (this == other) {
       return true;
-    if (other == null || getClass() != other.getClass())
+    }
+    if (other == null || getClass() != other.getClass()) {
       return false;
+    }
     StudentCourse that = (StudentCourse) other;
     return Objects.equals(course, that.course);
   }
