@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 public class Student {
 
-   private String nameId;
+  private String nameId;
 
   @NotBlank(message = "入力必須です。")
   private String name;
@@ -42,13 +42,29 @@ public class Student {
   private String remark;
   private boolean isDeleted;
 
+  public Student(String nameId, String name, String furigana, String nickname, String mailAddress,
+      String address, int age, String gender, String remark, boolean isDeleted) {
+    this.nameId = nameId;
+    this.name = name;
+    this.furigana = furigana;
+    this.nickname = nickname;
+    this.mailAddress = mailAddress;
+    this.address = address;
+    this.age = age;
+    this.gender = gender;
+    this.remark = remark;
+    this.isDeleted = isDeleted;
+  }
+
   @Override
   public boolean equals(Object other) {
-    if (this == other)
+    if (this == other) {
       return true;
+    }
 
-    if (other == null || getClass() != other.getClass())
+    if (other == null || getClass() != other.getClass()) {
       return false;
+    }
 
     Student student = (Student) other;
     return age == student.age &&
@@ -64,6 +80,9 @@ public class Student {
 
   @Override
   public int hashCode() {
-    return Objects.hash(nameId, name, furigana, nickname, mailAddress, address, age, gender, remark);
+    return Objects.hash(nameId, name, furigana, nickname, mailAddress, address, age, gender,
+        remark);
   }
+
+
 }
