@@ -30,6 +30,7 @@ public class StudentDetail {
   @Valid
   private List<ApplicationStatus> applicationStatusList;
 
+
   @Override
   public boolean equals(Object other) {
     if (this == other) {

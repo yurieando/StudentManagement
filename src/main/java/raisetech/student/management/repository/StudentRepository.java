@@ -1,10 +1,8 @@
 package raisetech.student.management.repository;
 
 import java.util.List;
-import java.util.Map;
-import org.apache.ibatis.annotations.Delete;
+import java.util.Optional;
 import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
@@ -26,10 +24,26 @@ public interface StudentRepository {
    * @return 受講生一覧（全件）
    */
   @Select("SELECT * FROM students")
-  List<Student> search();
+  List<Student> allSearchStudentList();
 
   /**
-   * 受講生情報の検索です。 IDに紐づく任意の受講生の情報を取得します。
+   * 受講生コース情報の検索です。
+   *
+   * @return 受講生コース情報(全件)
+   */
+  @Select("SELECT * FROM students_courses")
+  List<StudentCourse> allSearchStudentCourseList();
+
+  /**
+   * 受講状況一覧の検索です。
+   *
+   * @return 受講状況（全件）
+   */
+  @Select("SELECT * FROM application_status")
+  List<ApplicationStatus> allSearchApplicationStatusList();
+
+  /**
+   * 個別の受講生情報の検索です。 IDに紐づく任意の受講生の情報を取得します。
    *
    * @param nameId 受講生ID
    * @return 受講生情報
@@ -38,30 +52,22 @@ public interface StudentRepository {
   Student searchStudent(String nameId);
 
   /**
-   * 受講生コース情報の検索です。
-   *
-   * @return 受講生コース情報(全件)
-   */
-  @Select("SELECT * FROM students_courses")
-  List<StudentCourse> searchStudentCourseList();
-
-  /**
-   * 受講状況一覧の検索です。
-   *
-   * @return 受講状況（全件）
-   */
-  @Select("SELECT * FROM application_status")
-  List<ApplicationStatus> searchApplicationStatusList();
-
-
-  /**
    * 受講生IDに紐づく受講生コース情報を検索します。
    *
    * @param nameId 受講生ID
    * @return 受講生IDに紐づく受講生コース情報
    */
   @Select("SELECT * FROM students_courses WHERE name_id = #{nameId}")
-  List<StudentCourse> searchStudentCourse(String nameId);
+  List<StudentCourse> searchStudentCourseList(String nameId);
+
+  /**
+   * コースIDに紐づく受講状況を検索します。
+   *
+   * @param courseId コースID
+   * @return コースIDに紐づく受講状況
+   */
+  @Select("SELECT * FROM application_status WHERE course_id = #{courseId}")
+  List<ApplicationStatus> searchApplicationStatusList(String courseId);
 
   /**
    * 受講生情報を新規登録します
@@ -86,6 +92,14 @@ public interface StudentRepository {
   void registerStudentCourse(StudentCourse studentCourse);
 
   /**
+   * 受講状況を新規登録します。受講生コース情報の新規登録と共に仮申込を登録します。
+   */
+  @Insert("INSERT INTO application_status(course_id, name_id, application_status) VALUES(#{courseId}, #{nameId}, '仮申込')")
+  void registerApplicationStatus(@Param("courseId") String courseId,
+      @Param("nameId") String nameId);
+
+
+  /**
    * 受講生情報を更新します
    *
    * @param student 受講生
@@ -104,5 +118,21 @@ public interface StudentRepository {
   @Update("UPDATE students_courses SET course = #{course} WHERE name_id = #{nameId}")
   void updateStudentCourse(StudentCourse studentCourse);
 
-  boolean existsById(String studentId);
+
+  /**
+   * 受講状況を更新します
+   *
+   * @param applicationStatus 受講状況
+   */
+  @Update("UPDATE application_status SET application_status = #{applicationStatus} WHERE course_id = #{courseId}")
+  void updateApplicationStatus(ApplicationStatus applicationStatus);
+
+  /**
+   * 受講生情報が存在するか確認します
+   *
+   * @param nameId 受講生ID
+   * @return 受講生情報
+   */
+  public Optional<Student> findByNameId(String nameId);
+
 }

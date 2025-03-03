@@ -1,9 +1,7 @@
-# Gradleのディレクトリを無視
 .gradle/
-
-# ビルドファイルのディレクトリを無視
 /build/
 
-.DS_Store
+**/.DS_Store
+
 .idea/
 

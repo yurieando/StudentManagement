@@ -1,8 +1,9 @@
 package raisetech.student.management.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
 import raisetech.student.management.repository.StudentRepository;
+
 
 /**
  * 受講生情報を扱うサービス 受講生の検索や登録、更新処理を行ないます。
@@ -34,9 +36,9 @@ public class StudentService {
    * @return 受講生詳細一覧（全件）
    */
   public List<StudentDetail> searchStudentList() {
-    List<Student> studentList = repository.search();
-    List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
-    List<ApplicationStatus> applicationStatusList = repository.searchApplicationStatusList();
+    List<Student> studentList = repository.allSearchStudentList();
+    List<StudentCourse> studentCourseList = repository.allSearchStudentCourseList();
+    List<ApplicationStatus> applicationStatusList = repository.allSearchApplicationStatusList();
 
     return converter.convertStudentDetails(studentList, studentCourseList, applicationStatusList);
   }
@@ -49,13 +51,21 @@ public class StudentService {
    */
   public StudentDetail searchStudent(String nameId) {
     Student student = repository.searchStudent(nameId);
-    List<StudentCourse> studentCourseList = repository.searchStudentCourse(student.getNameId());
-    List<ApplicationStatus> applicationStatusList = repository.searchApplicationStatusList();
+    List<StudentCourse> studentCourseList = repository.searchStudentCourseList(student.getNameId());
+    List<String> courseIdList = studentCourseList.stream().
+        map(StudentCourse::getCourseId)
+        .collect(Collectors.toList());
+
+    List<ApplicationStatus> applicationStatusList = courseIdList.stream()
+        .flatMap(courseId -> repository.searchApplicationStatusList(courseId).stream())
+        .collect(Collectors.toList());
+
     return new StudentDetail(student, studentCourseList, applicationStatusList);
   }
 
   /**
    * 受講生詳細を登録します。 受講生情報と受講生コース情報を個別に登録し、受講生コース情報には受講生情報を紐づけるための値や日付情報を設定します。
+   * 受講生コース情報を登録すると共に、受講状況を仮申込で登録します。
    *
    * @param studentDetail 受講生詳細
    * @return 登録情報を付与した受講生詳細
@@ -63,12 +73,21 @@ public class StudentService {
   @Transactional
   public StudentDetail registerStudent(StudentDetail studentDetail) {
     Student student = studentDetail.getStudent();
+    List<ApplicationStatus> applicationStatusList = new ArrayList<>();
 
     repository.registerStudent(student);
+
     studentDetail.getStudentCourseList().forEach(studentCourse -> {
       initStudentCourse(studentCourse, student);
       repository.registerStudentCourse(studentCourse);
+
+      String courseId = studentCourse.getCourseId();
+      repository.registerApplicationStatus(courseId, student.getNameId());
+      applicationStatusList.add(new ApplicationStatus(courseId, student.getNameId(), "仮申込"));
     });
+
+    studentDetail.setApplicationStatusList(applicationStatusList);
+
     return studentDetail;
   }
 
@@ -93,10 +112,21 @@ public class StudentService {
    */
   @Transactional
   public StudentDetail updateStudent(StudentDetail studentDetail) {
-    String studentId = studentDetail.getStudent().getNameId();
-    repository.updateStudent(studentDetail.getStudent());
-    studentDetail.getStudentCourseList()
-        .forEach(studentCourse -> repository.updateStudentCourse(studentCourse));
-    return studentDetail;
+    String nameId = studentDetail.getStudent().getNameId();
+
+    if (nameId == null) {
+      return studentDetail;
+    } else {
+      repository.updateStudent(studentDetail.getStudent());
+
+      studentDetail.getStudentCourseList().forEach(studentCourse -> {
+        repository.updateStudentCourse(studentCourse);
+      });
+      studentDetail.getApplicationStatusList().forEach(applicationStatus -> {
+        repository.updateApplicationStatus(applicationStatus);
+      });
+
+      return studentDetail;
+    }
   }
 }

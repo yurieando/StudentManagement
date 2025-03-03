@@ -222,6 +222,14 @@ class StudentControllerTest {
                     "deadline" : "2024-01-01T11:11:11.123456"
                 }
             ]
+            ,
+            "applicationStatusList": [
+                        {
+                            "courseId": "99",
+                            "nameId": "99",
+                            "applicationStatus": "受講中"
+                        }
+                    ]
         }
         """;
 

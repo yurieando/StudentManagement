@@ -13,6 +13,12 @@ public class ApplicationStatus {
   private String nameId;
   private String applicationStatus;
 
+  public ApplicationStatus(String courseId, String nameId, String applicationStatus) {
+    this.courseId = courseId;
+    this.nameId = nameId;
+    this.applicationStatus = applicationStatus;
+  }
+
   @Override
   public boolean equals(Object other) {
     if (this == other) {

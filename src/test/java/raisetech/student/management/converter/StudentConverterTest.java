@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import raisetech.student.management.controller.converter.StudentConverter;
+import raisetech.student.management.data.ApplicationStatus;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
@@ -28,7 +29,7 @@ public class StudentConverterTest {
   private StudentConverter sut;
 
   @Test
-  void 生徒情報とコース情報を結合したリストが生成できていること() {
+  void 生徒情報とコース情報と申込状況を結合したリストが生成できていること() {
     List<Student> studentList = new ArrayList<>();
     Student testStudent = new Student("1", "テスト名", "テストフリガナ", "テストニックネーム"
         , "test@email.com", "東京", 20, "男性", "", false);
@@ -39,15 +40,26 @@ public class StudentConverterTest {
         LocalDate.now().plusYears(1));
     studentCourseList.add(testStudentCourse);
 
+    List<ApplicationStatus> applicationStatusList = new ArrayList<>();
+    ApplicationStatus testApplicationStatus = new ApplicationStatus("1", "1", "受講中");
+    applicationStatusList.add(testApplicationStatus);
+
     List<StudentDetail> expectedStudentDetails = new ArrayList<>();
     StudentDetail testDetail = new StudentDetail();
     testDetail.setStudent(testStudent);
+
     List<StudentCourse> testStudentCourseList = new ArrayList<>();
     testStudentCourseList.add(testStudentCourse);
     testDetail.setStudentCourseList(testStudentCourseList);
+
+    List<ApplicationStatus> testApplicationStatusList = new ArrayList<>();
+    testApplicationStatusList.add(testApplicationStatus);
+    testDetail.setApplicationStatusList(testApplicationStatusList);
+
     expectedStudentDetails.add(testDetail);
 
-    List<StudentDetail> actual = sut.convertStudentDetails(studentList, studentCourseList);
+    List<StudentDetail> actual = sut.convertStudentDetails(studentList, studentCourseList,
+        applicationStatusList);
 
     assertEquals(expectedStudentDetails, actual);
   }
@@ -64,14 +76,24 @@ public class StudentConverterTest {
         LocalDate.now().plusYears(1));
     studentCourseList.add(testStudentCourse);
 
+    List<ApplicationStatus> applicationStatusList = new ArrayList<>();
+    ApplicationStatus testApplicationStatus = new ApplicationStatus("1", "1", "受講中");
+    applicationStatusList.add(testApplicationStatus);
+
     List<StudentDetail> expectedStudentDetails = new ArrayList<>();
     StudentDetail testDetail = new StudentDetail();
     testDetail.setStudent(testStudent);
+
     List<StudentCourse> testStudentCourseList = new ArrayList<>();
     testDetail.setStudentCourseList(testStudentCourseList);
+
+    List<ApplicationStatus> testApplicationStatusList = new ArrayList<>();
+    testDetail.setApplicationStatusList(testApplicationStatusList);
+
     expectedStudentDetails.add(testDetail);
 
-    List<StudentDetail> actual = sut.convertStudentDetails(studentList, studentCourseList);
+    List<StudentDetail> actual = sut.convertStudentDetails(studentList, studentCourseList,
+        applicationStatusList);
 
     assertEquals(expectedStudentDetails, actual, "nameIdが紐づかないコースが除外されていません。");
   }

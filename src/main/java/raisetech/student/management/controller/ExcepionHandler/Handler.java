@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class Handler {
 
   @ExceptionHandler(ConstraintViolationException.class)
-  public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
+  public ResponseEntity<String> handleConstraintViolationException(
+      ConstraintViolationException ex) {
     String errorMessage = ex.getConstraintViolations().stream()
         .map(violation -> violation.getMessage())
         .findFirst()
