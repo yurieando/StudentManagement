@@ -2,6 +2,7 @@ package raisetech.student.management.repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
@@ -128,11 +129,46 @@ public interface StudentRepository {
   void updateApplicationStatus(ApplicationStatus applicationStatus);
 
   /**
+   * 受講生情報を削除します
+   *
+   * @param nameId 受講生ID
+   */
+  @Delete("DELETE FROM students WHERE name_id = #{nameId}")
+  void deleteStudent(@Param("nameId") String nameId);
+
+  /**
+   * 受講生コース情報を削除します
+   *
+   * @param courseId コースID
+   */
+  @Delete("DELETE FROM students_courses WHERE course_id = #{courseId}")
+  void deleteStudentCourse(@Param("courseId") String courseId);
+
+  /**
+   * 受講状況を削除します
+   *
+   * @param courseId コースID
+   */
+  @Delete("DELETE FROM application_status WHERE course_id = #{courseId}")
+  void deleteApplicationStatus(@Param("courseId") String courseId);
+
+
+  /**
    * 受講生情報が存在するか確認します
    *
    * @param nameId 受講生ID
    * @return 受講生情報
    */
-  public Optional<Student> findByNameId(String nameId);
+  @Select("SELECT * FROM students WHERE name_id = #{nameId}")
+  Optional<Student> findByNameId(@Param("nameId") String nameId);
 
+  /**
+   * 受講生コース情報が存在するか確認します
+   *
+   * @param courseId コースID
+   * @return 受講生コース情報
+   */
+  @Select("SELECT * FROM students_courses WHERE course_id = #{courseId}")
+  Optional<StudentCourse> findByCourseId(@Param("courseId") String courseId);
 }
+

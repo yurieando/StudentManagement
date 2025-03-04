@@ -2,11 +2,14 @@ package raisetech.student.management.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import raisetech.student.management.controller.ExcepionHandler.ResourceNotFoundException;
 import raisetech.student.management.controller.converter.StudentConverter;
 import raisetech.student.management.data.ApplicationStatus;
 import raisetech.student.management.data.Student;
@@ -51,9 +54,14 @@ public class StudentService {
    */
   public StudentDetail searchStudent(String nameId) {
     Student student = repository.searchStudent(nameId);
+
+    if (student == null) {
+      throw new ResourceNotFoundException("入力されたIDは存在しません: " + nameId);
+    }
+
     List<StudentCourse> studentCourseList = repository.searchStudentCourseList(student.getNameId());
-    List<String> courseIdList = studentCourseList.stream().
-        map(StudentCourse::getCourseId)
+    List<String> courseIdList = studentCourseList.stream()
+        .map(StudentCourse::getCourseId)
         .collect(Collectors.toList());
 
     List<ApplicationStatus> applicationStatusList = courseIdList.stream()
@@ -62,6 +70,7 @@ public class StudentService {
 
     return new StudentDetail(student, studentCourseList, applicationStatusList);
   }
+
 
   /**
    * 受講生詳細を登録します。 受講生情報と受講生コース情報を個別に登録し、受講生コース情報には受講生情報を紐づけるための値や日付情報を設定します。
@@ -115,7 +124,13 @@ public class StudentService {
     String nameId = studentDetail.getStudent().getNameId();
 
     if (nameId == null) {
-      return studentDetail;
+      throw new ResourceNotFoundException("入力されたIDは存在しません: " + nameId);
+
+    }
+    Optional<Student> existingStudent = repository.findByNameId(nameId);
+
+    if (existingStudent.isEmpty()) {
+      throw new ResourceNotFoundException("入力されたIDは存在しません: " + nameId);
     } else {
       repository.updateStudent(studentDetail.getStudent());
 
@@ -128,5 +143,36 @@ public class StudentService {
 
       return studentDetail;
     }
+  }
+
+  /**
+   * 受講生詳細を削除します。同時に受講生コース情報と受講状況も削除します。
+   *
+   * @param nameId 受講生ID
+   */
+  public void deleteStudent(String nameId) {
+    if (nameId == null) {
+      throw new ResourceNotFoundException("入力されたIDは存在しません: " + nameId);
+    }
+    repository.deleteStudent(nameId);
+    List<StudentCourse> studentCourseList = repository.searchStudentCourseList(nameId);
+    studentCourseList.forEach(studentCourse -> {
+      String courseId = studentCourse.getCourseId();
+      repository.deleteStudentCourse(courseId);
+      repository.deleteApplicationStatus(courseId);
+    });
+  }
+
+  /**
+   * 受講生コース情報を削除します。同時に受講状況も削除します。
+   *
+   * @param courseId コースID
+   */
+  public void deleteStudentCourse(String courseId) {
+    if (courseId == null) {
+      throw new ResourceNotFoundException("入力されたコースIDは存在しません: " + courseId);
+    }
+    repository.deleteStudentCourse(courseId);
+    repository.deleteApplicationStatus(courseId);
   }
 }

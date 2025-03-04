@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -29,6 +30,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import raisetech.student.management.controller.ExcepionHandler.ResourceNotFoundException;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
@@ -64,13 +66,17 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細検索_異常系_IDに数字以外を用いたときに入力チェックにかかること() throws Exception {
-    String invalidNameId = "abc";
-    mockMvc.perform(get("/student/{nameId}", invalidNameId))
-        .andExpect(status().isBadRequest())
-        .andExpect(content().string("IDは数値のみ入力してください。"));
+  void 受講生詳細検索_異常系_存在しないIDを指定した場合エラーが表示されること() throws Exception {
+    String invalidNameId = "999";
+    doThrow(new ResourceNotFoundException("入力されたIDは存在しません: " + invalidNameId))
+        .when(service).searchStudent(invalidNameId);
 
-    verify(service, times(0)).searchStudent(any());
+    mockMvc.perform(get("/student/{nameId}", invalidNameId))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.message").value(
+            "入力されたIDは存在しません: " + invalidNameId));
+
+    verify(service, times(1)).searchStudent(invalidNameId);
   }
 
   @Test
@@ -240,5 +246,54 @@ class StudentControllerTest {
 
     verify(service, times(1)).updateStudent(any());
   }
+
+  @Test
+  void 受講生詳細削除_正常系_IDが正しい場合に正常に削除が実行できること() throws Exception {
+    String nameId = "999";
+    mockMvc.perform(delete("/deleteStudent/{nameId}", nameId))
+        .andExpect(status().isOk());
+
+    verify(service, times(1)).deleteStudent(nameId);
+  }
+
+  @Test
+  void 受講生詳細削除_異常系_IDが存在しない場合にエラーが表示されること() throws Exception {
+    String invalidNameId = "999";
+    doThrow(new ResourceNotFoundException("入力されたIDは存在しません: " + invalidNameId))
+        .when(service).deleteStudent(invalidNameId);
+
+    mockMvc.perform(delete("/deleteStudent/{nameId}", invalidNameId))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.message").value(
+            "入力されたIDは存在しません: " + invalidNameId));
+
+    verify(service, times(1)).deleteStudent(invalidNameId);
+
+  }
+
+  @Test
+  void 受講生コース情報削除_正常系_IDが正しい場合に正常に削除が実行できること() throws Exception {
+    String courseId = "999";
+    mockMvc.perform(delete("/deleteStudentCourse/{courseId}", courseId))
+        .andExpect(status().isOk());
+
+    verify(service, times(1)).deleteStudentCourse(courseId);
+  }
+
+  @Test
+  void 受講生コース情報削除_異常系_IDが存在しない場合にエラーが表示されること() throws Exception {
+    String invalidCourseId = "999";
+    doThrow(new ResourceNotFoundException("入力されたコースIDは存在しません: " + invalidCourseId))
+        .when(service).deleteStudentCourse(invalidCourseId);
+
+    mockMvc.perform(delete("/deleteStudentCourse/{courseId}", invalidCourseId))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.message").value(
+            "入力されたコースIDは存在しません: " + invalidCourseId));
+
+    verify(service, times(1)).deleteStudentCourse(invalidCourseId);
+  }
+
 }
+
 

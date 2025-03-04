@@ -5,10 +5,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import java.util.List;
+import java.util.Optional;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.ErrorResponse;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +20,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import raisetech.student.management.controller.ExcepionHandler.ResourceNotFoundException;
 import raisetech.student.management.controller.ExcepionHandler.TestException;
+import raisetech.student.management.data.Student;
+import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
 import raisetech.student.management.service.StudentService;
 
@@ -29,14 +36,15 @@ public class StudentController {
 
   private StudentService service;
 
+
   @Autowired
   public StudentController(StudentService service) {
     this.service = service;
-   }
+  }
 
   /**
-   * 受講生詳細の一覧検索です。
-   * 全件検索を行うので、条件指定は行いません。
+   * 受講生詳細の一覧検索です。 全件検索を行うので、条件指定は行いません。
+   *
    * @return　受講生一覧（全件）
    */
   @Operation(summary = "受講生一覧の検索", description = "受講生一覧を全件検索します。")
@@ -48,9 +56,10 @@ public class StudentController {
   @Operation(summary = "IDによる受講生検索", description = "受講生をIDから個別検索します。")
   @GetMapping("/student/{nameId}")
   public StudentDetail getStudent(
-      @PathVariable @NotBlank @Pattern(regexp = "^\\d+$", message = "IDは数値のみ入力してください。") String nameId) {
+      @PathVariable @NotBlank String nameId) {
     return service.searchStudent(nameId);
   }
+
 
   @Operation(summary = "受講生詳細の新規登録", description = "受講生詳細を新しく登録します。")
   @PostMapping("/registerStudent")
@@ -58,7 +67,8 @@ public class StudentController {
       @RequestBody @Valid StudentDetail studentDetail) {
     StudentDetail responsStudentDetail = service.registerStudent(studentDetail);
     return ResponseEntity.ok(responsStudentDetail);
-    }
+  }
+
 
   @Operation(summary = "受講生詳細の更新", description = "受講生詳細の更新です。キャンセルフラグの更新もここで行います。")
   @PutMapping("/updateStudent")
@@ -66,6 +76,21 @@ public class StudentController {
     StudentDetail updateStudentDetail = service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました。");
   }
+
+  @Operation(summary = "受講生詳細の削除", description = "受講生詳細を削除します。")
+  @DeleteMapping("/deleteStudent/{nameId}")
+  public ResponseEntity<String> deleteStudent(@PathVariable @NotBlank String nameId) {
+    service.deleteStudent(nameId);
+    return ResponseEntity.status(HttpStatus.OK).body("削除処理が成功しました。");
+  }
+
+  @Operation(summary = "受講生コース情報の削除", description = "受講生コース情報を削除します。")
+  @DeleteMapping("/deleteStudentCourse/{courseId}")
+  public ResponseEntity<String> deleteStudentCourse(@PathVariable @NotBlank String courseId) {
+    service.deleteStudentCourse(courseId);
+    return ResponseEntity.status(HttpStatus.OK).body("削除処理が成功しました。");
+  }
+
 
   @Operation(summary = "テスト用例外", description = "例外を発生させます。")
   @GetMapping("/testException")
