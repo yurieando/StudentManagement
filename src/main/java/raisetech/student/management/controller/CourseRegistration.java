@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class CourseRegistrationRequest {
+public class CourseRegistration {
 
   @NotBlank(message = "入力必須です。")
   private String courseName;

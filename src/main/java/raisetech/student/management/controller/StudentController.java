@@ -67,7 +67,7 @@ public class StudentController {
   @PostMapping("/registerStudentCourse/{nameId}")
   public ResponseEntity<StudentCourse> registerStudentCourse(
       @PathVariable @NotBlank String nameId,
-      @RequestBody @Valid CourseRegistrationRequest request) {
+      @RequestBody @Valid CourseRegistration request) {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setCourseName(request.getCourseName());
     StudentCourse registeredStudentCourse = service.registerStudentCourse(nameId, studentCourse);
