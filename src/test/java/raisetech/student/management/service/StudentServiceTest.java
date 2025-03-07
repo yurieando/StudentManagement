@@ -133,7 +133,6 @@ class StudentServiceTest {
     ApplicationStatus applicationStatus2 = new ApplicationStatus("2", nameId, "仮申込");
     List<ApplicationStatus> applicationStatusList = List.of(applicationStatus1, applicationStatus2);
 
-    when(repository.findByNameId(nameId)).thenReturn(Optional.of(student));
     doNothing().when(repository).registerStudent(any(Student.class));
     doNothing().when(repository).registerStudentCourse(any(StudentCourse.class));
     doNothing().when(repository).registerApplicationStatus(anyString(), anyString());
@@ -201,6 +200,13 @@ class StudentServiceTest {
   void 受講生詳細の削除_削除処理のリポジトリを適切な回数呼び出せていること() {
     String nameId = "テストID";
     String courseId = "テストコースID";
+    Student student = new Student(nameId, "氏名", "シメイ", "ニックネーム", "test@mail.com",
+        "住所", 20, "male", "", false);
+
+    when(repository.findByNameId(nameId)).thenReturn(Optional.of(student));
+    when(repository.searchStudentCourseList(nameId))
+        .thenReturn(List.of(new StudentCourse(courseId, nameId, "Java", LocalDate.now(),
+            LocalDate.now().plusYears(1))));
 
     doNothing().when(repository).deleteStudent(nameId);
     doNothing().when(repository).deleteStudentCourse(courseId);
@@ -218,19 +224,22 @@ class StudentServiceTest {
   void 受講生詳細の削除_存在しないIDを指定した場合に例外がスローされること() {
     String invalidNameId = "0";
 
-    doThrow(ResourceNotFoundException.class).when(repository).deleteStudent(invalidNameId);
+    when(repository.findByNameId(invalidNameId)).thenReturn(Optional.empty());
 
     assertThrows(ResourceNotFoundException.class, () -> {
       sut.deleteStudent(invalidNameId);
     });
 
-    verify(repository, times(1)).deleteStudent(invalidNameId);
+    verify(repository, times(0)).deleteStudent(invalidNameId);
   }
 
   @Test
   void 受講生コース情報の削除_削除処理のリポジトリを適切な回数呼び出せていること() {
-    String nameId = "テストID";
     String courseId = "テストコースID";
+    StudentCourse studentCourse = new StudentCourse(courseId, "テストID", "Java", LocalDate.now(),
+        LocalDate.now().plusYears(1));
+
+    when(repository.findByCourseId(courseId)).thenReturn(Optional.of(studentCourse));
 
     doNothing().when(repository).deleteStudentCourse(courseId);
     doNothing().when(repository).deleteApplicationStatus(courseId);
@@ -245,12 +254,12 @@ class StudentServiceTest {
   void 受講生コース情報の削除_存在しないIDを指定した場合に例外がスローされること() {
     String invalidCourseId = "0";
 
-    doThrow(ResourceNotFoundException.class).when(repository).deleteStudentCourse(invalidCourseId);
-
+    when(repository.findByCourseId(invalidCourseId)).thenReturn(Optional.empty());
+    
     assertThrows(ResourceNotFoundException.class, () -> {
       sut.deleteStudentCourse(invalidCourseId);
     });
 
-    verify(repository, times(1)).deleteStudentCourse(invalidCourseId);
+    verify(repository, times(0)).deleteStudentCourse(invalidCourseId);
   }
 }
