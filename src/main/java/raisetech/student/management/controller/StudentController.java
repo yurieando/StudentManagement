@@ -3,15 +3,11 @@ package raisetech.student.management.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import java.util.List;
-import java.util.Optional;
-import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,9 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import raisetech.student.management.controller.ExcepionHandler.ResourceNotFoundException;
 import raisetech.student.management.controller.ExcepionHandler.TestException;
-import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
 import raisetech.student.management.service.StudentService;
@@ -69,6 +63,16 @@ public class StudentController {
     return ResponseEntity.ok(responsStudentDetail);
   }
 
+  @Operation(summary = "受講生コース情報の新規登録", description = "受講生コース情報を新しく登録します。")
+  @PostMapping("/registerStudentCourse/{nameId}")
+  public ResponseEntity<StudentCourse> registerStudentCourse(
+      @PathVariable @NotBlank String nameId,
+      @RequestBody @Valid CourseRegistrationRequest request) {
+    StudentCourse studentCourse = new StudentCourse();
+    studentCourse.setCourseName(request.getCourseName());
+    StudentCourse registeredStudentCourse = service.registerStudentCourse(nameId, studentCourse);
+    return ResponseEntity.ok(registeredStudentCourse);
+  }
 
   @Operation(summary = "受講生詳細の更新", description = "受講生詳細の更新です。キャンセルフラグの更新もここで行います。")
   @PutMapping("/updateStudent")
@@ -97,4 +101,10 @@ public class StudentController {
   public void testException() throws TestException {
     throw new TestException("テスト用の例外です。");
   }
+
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+  }
+
 }

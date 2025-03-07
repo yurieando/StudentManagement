@@ -59,8 +59,7 @@ class StudentServiceTest {
     when(repository.allSearchStudentCourseList()).thenReturn(studentCourseList);
     when(repository.allSearchApplicationStatusList()).thenReturn(applicationStatusList);
     when(converter.convertStudentDetails(studentList, studentCourseList,
-        applicationStatusList)).thenReturn(
-        expectedStudentDetails);
+        applicationStatusList)).thenReturn(expectedStudentDetails);
 
     //実行
     List<StudentDetail> actual = sut.searchStudentList();
@@ -78,20 +77,22 @@ class StudentServiceTest {
   @Test
   void 受講生詳細の検索_個別の受講生詳細を呼び出せていること() {
     String nameId = "テストID";
-    String courseId = "1";
+    String courseId = "テストコースID";
     Student student = new Student(nameId, "氏名", "シメイ", "ニックネーム", "test@mail.com",
         "住所", 20, "male", "", false);
 
-    StudentCourse testCourse = new StudentCourse(courseId, nameId, "Java", LocalDate.now(),
+    StudentCourse studentCourse = new StudentCourse(courseId, nameId, "Java", LocalDate.now(),
         LocalDate.now().plusYears(1));
-    List<StudentCourse> studentCourseList = List.of(testCourse);
+    List<StudentCourse> studentCourseList = List.of(studentCourse);
 
     ApplicationStatus testApplicationStatus = new ApplicationStatus(courseId, nameId, "受講中");
     List<ApplicationStatus> applicationStatusList = List.of(testApplicationStatus);
 
+    when(repository.findByNameId(nameId)).thenReturn(Optional.of(student));
     when(repository.searchStudent(nameId)).thenReturn(student);
     when(repository.searchStudentCourseList(student.getNameId())).thenReturn(studentCourseList);
-    when(repository.searchApplicationStatusList(anyString())).thenReturn(applicationStatusList);
+    when(repository.searchApplicationStatusList(studentCourse.getCourseId())).thenReturn(
+        applicationStatusList);
 
     StudentDetail expected = new StudentDetail(student, studentCourseList, applicationStatusList);
 
@@ -99,16 +100,16 @@ class StudentServiceTest {
 
     verify(repository, times(1)).searchStudent(nameId);
     verify(repository, times(1)).searchStudentCourseList(student.getNameId());
-    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(repository, times(1)).searchApplicationStatusList(captor.capture());
+    verify(repository, times(1)).searchApplicationStatusList(studentCourse.getCourseId());
 
-    assertEquals((testCourse.getCourseId()), captor.getValue());
+    assertEquals(student.getNameId(), actual.getStudent().getNameId());
+    assertEquals((studentCourse.getCourseId()), actual.getStudentCourseList().get(0).getCourseId());
     assertEquals(expected, actual);
   }
 
   @Test
   void 受講生詳細の検索_存在しないIDを指定した場合に例外がスローされること() {
-    String invalidNameId = "999";
+    String invalidNameId = "0";
     when(repository.searchStudent(invalidNameId)).thenReturn(null);
 
     assertThrows(ResourceNotFoundException.class, () -> {
@@ -119,36 +120,70 @@ class StudentServiceTest {
   @Test
   void 受講生詳細の新規登録_登録処理のリポジトリを適切な回数呼び出せていること() {
     String nameId = "テストID";
-    String courseId = "1";
     Student student = new Student(nameId, "氏名", "シメイ", "ニックネーム", "test@mail.com",
         "住所", 20, "male", "", false);
-    StudentCourse studentCourse = new StudentCourse(courseId, nameId, "Java", LocalDate.now(),
+
+    StudentCourse studentCourse1 = new StudentCourse("1", nameId, "Java", LocalDate.now(),
         LocalDate.now().plusYears(1));
-    List<StudentCourse> studentCourseList = List.of(studentCourse);
-    ApplicationStatus applicationStatus = new ApplicationStatus(courseId, nameId, "仮申込");
-    List<ApplicationStatus> applicationStatusList = List.of(applicationStatus);
+    StudentCourse studentCourse2 = new StudentCourse("2", nameId, "Python", LocalDate.now(),
+        LocalDate.now().plusYears(1));
+    List<StudentCourse> studentCourseList = List.of(studentCourse1, studentCourse2);
+
+    ApplicationStatus applicationStatus1 = new ApplicationStatus("1", nameId, "仮申込");
+    ApplicationStatus applicationStatus2 = new ApplicationStatus("2", nameId, "仮申込");
+    List<ApplicationStatus> applicationStatusList = List.of(applicationStatus1, applicationStatus2);
+
+    when(repository.findByNameId(nameId)).thenReturn(Optional.of(student));
+    doNothing().when(repository).registerStudent(any(Student.class));
+    doNothing().when(repository).registerStudentCourse(any(StudentCourse.class));
+    doNothing().when(repository).registerApplicationStatus(anyString(), anyString());
 
     StudentDetail studentDetail = new StudentDetail(student, studentCourseList,
         applicationStatusList);
 
-    StudentDetail result = sut.registerStudent(studentDetail);
+    sut.registerStudent(studentDetail);
 
-    verify(repository, times(1)).registerStudent(student);
-    verify(repository, times(studentCourseList.size())).registerStudentCourse(studentCourse);
+    verify(repository, times(1)).registerStudent(any(Student.class));
+    verify(repository, times(studentCourseList.size())).registerStudentCourse(
+        any(StudentCourse.class));
     verify(repository, times(applicationStatusList.size())).registerApplicationStatus(anyString(),
         anyString());
   }
 
   @Test
-  void 受講生詳細の更新_更新処理のリポジトリを適切な回数呼び出せていること() {
+  void 受講生コース情報の新規登録_登録処理のリポジトリを適切な回数呼び出せていること() {
     String nameId = "テストID";
-    String courseId = "1";
+    String courseId = "テストコースID";
+    StudentCourse studentCourse = new StudentCourse(courseId, nameId, "Java", LocalDate.now(),
+        LocalDate.now().plusYears(1));
+    ApplicationStatus applicationStatus = new ApplicationStatus(courseId, nameId, "仮申込");
+
     Student student = new Student(nameId, "氏名", "シメイ", "ニックネーム", "test@mail.com",
         "住所", 20, "male", "", false);
 
+    when(repository.findByNameId(nameId)).thenReturn(Optional.of(student));
+
+    doNothing().when(repository).registerStudentCourse(any(StudentCourse.class));
+    doNothing().when(repository).registerApplicationStatus(anyString(), anyString());
+
+    sut.registerStudentCourse(nameId, studentCourse);
+
+    verify(repository, times(1)).registerStudentCourse(any(StudentCourse.class));
+    verify(repository, times(1)).registerApplicationStatus(anyString(), anyString());
+  }
+
+  @Test
+  void 受講生詳細の更新_更新処理のリポジトリを適切な回数呼び出せていること() {
+    String nameId = "テストID";
+    String courseId = "テストコースID";
+    Student student = new Student(nameId, "氏名", "シメイ", "ニックネーム", "test@mail.com",
+        "住所", 20, "male", "", false);
+
+    when(repository.findByNameId(nameId)).thenReturn(Optional.of(student));
+
     StudentCourse studentCourse = new StudentCourse(courseId, nameId, "Java", LocalDate.now(),
         LocalDate.now().plusYears(1));
-    List<StudentCourse> studentCourseList = new ArrayList<>();
+    List<StudentCourse> studentCourseList = List.of(studentCourse);
 
     ApplicationStatus applicationStatus = new ApplicationStatus(courseId, nameId, "受講中");
     List<ApplicationStatus> applicationStatusList = List.of(applicationStatus);
@@ -157,42 +192,31 @@ class StudentServiceTest {
 
     sut.updateStudent(studentDetail);
 
-    verify(repository, times(1)).updateStudent(student);
-    verify(repository, times(studentCourseList.size())).updateStudentCourse(studentCourse);
-    verify(repository, times(applicationStatusList.size())).updateApplicationStatus(
-        applicationStatus);
+    verify(repository, times(1)).updateStudent(any(Student.class));
+    verify(repository, times(1)).updateStudentCourse(any(StudentCourse.class));
+    verify(repository, times(1)).updateApplicationStatus(any(ApplicationStatus.class));
   }
 
   @Test
   void 受講生詳細の削除_削除処理のリポジトリを適切な回数呼び出せていること() {
     String nameId = "テストID";
-    String courseId = "1";
-    Student student = new Student(nameId, "氏名", "シメイ", "ニックネーム", "test@mail.com",
-        "住所", 20, "male", "", false);
-
-    StudentCourse testCourse = new StudentCourse(courseId, nameId, "Java", LocalDate.now(),
-        LocalDate.now().plusYears(1));
-    List<StudentCourse> studentCourseList = List.of(testCourse);
-
-    ApplicationStatus testApplicationStatus = new ApplicationStatus(courseId, nameId, "受講中");
-    List<ApplicationStatus> applicationStatusList = List.of(testApplicationStatus);
+    String courseId = "テストコースID";
 
     doNothing().when(repository).deleteStudent(nameId);
     doNothing().when(repository).deleteStudentCourse(courseId);
     doNothing().when(repository).deleteApplicationStatus(courseId);
 
     sut.deleteStudent(nameId);
-    sut.deleteStudentCourse(courseId);
 
     verify(repository, times(1)).deleteStudent(nameId);
-    verify(repository, times(studentCourseList.size())).deleteStudentCourse(courseId);
-    verify(repository, times(applicationStatusList.size())).deleteApplicationStatus(courseId);
+    verify(repository, times(1)).deleteStudentCourse(courseId);
+    verify(repository, times(1)).deleteApplicationStatus(courseId);
   }
 
 
   @Test
   void 受講生詳細の削除_存在しないIDを指定した場合に例外がスローされること() {
-    String invalidNameId = "999";
+    String invalidNameId = "0";
 
     doThrow(ResourceNotFoundException.class).when(repository).deleteStudent(invalidNameId);
 
@@ -206,13 +230,7 @@ class StudentServiceTest {
   @Test
   void 受講生コース情報の削除_削除処理のリポジトリを適切な回数呼び出せていること() {
     String nameId = "テストID";
-    String courseId = "1";
-    StudentCourse testCourse = new StudentCourse(courseId, nameId, "Java", LocalDate.now(),
-        LocalDate.now().plusYears(1));
-    List<StudentCourse> studentCourseList = List.of(testCourse);
-
-    ApplicationStatus testApplicationStatus = new ApplicationStatus(courseId, nameId, "受講中");
-    List<ApplicationStatus> applicationStatusList = List.of(testApplicationStatus);
+    String courseId = "テストコースID";
 
     doNothing().when(repository).deleteStudentCourse(courseId);
     doNothing().when(repository).deleteApplicationStatus(courseId);
@@ -220,12 +238,12 @@ class StudentServiceTest {
     sut.deleteStudentCourse(courseId);
 
     verify(repository, times(1)).deleteStudentCourse(courseId);
-    verify(repository, times(applicationStatusList.size())).deleteApplicationStatus(courseId);
+    verify(repository, times(1)).deleteApplicationStatus(courseId);
   }
 
   @Test
   void 受講生コース情報の削除_存在しないIDを指定した場合に例外がスローされること() {
-    String invalidCourseId = "999";
+    String invalidCourseId = "0";
 
     doThrow(ResourceNotFoundException.class).when(repository).deleteStudentCourse(invalidCourseId);
 

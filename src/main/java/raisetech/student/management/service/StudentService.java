@@ -2,7 +2,6 @@ package raisetech.student.management.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,20 +54,22 @@ public class StudentService {
   public StudentDetail searchStudent(String nameId) {
     Student student = repository.searchStudent(nameId);
 
-    if (student == null) {
+    Optional<Student> existingStudent = repository.findByNameId(nameId);
+    if (existingStudent.isEmpty()) {
       throw new ResourceNotFoundException("入力されたIDは存在しません: " + nameId);
+    } else {
+      List<StudentCourse> studentCourseList = repository.searchStudentCourseList(
+          student.getNameId());
+      List<String> courseIdList = studentCourseList.stream()
+          .map(StudentCourse::getCourseId)
+          .collect(Collectors.toList());
+
+      List<ApplicationStatus> applicationStatusList = courseIdList.stream()
+          .flatMap(courseId -> repository.searchApplicationStatusList(courseId).stream())
+          .collect(Collectors.toList());
+
+      return new StudentDetail(student, studentCourseList, applicationStatusList);
     }
-
-    List<StudentCourse> studentCourseList = repository.searchStudentCourseList(student.getNameId());
-    List<String> courseIdList = studentCourseList.stream()
-        .map(StudentCourse::getCourseId)
-        .collect(Collectors.toList());
-
-    List<ApplicationStatus> applicationStatusList = courseIdList.stream()
-        .flatMap(courseId -> repository.searchApplicationStatusList(courseId).stream())
-        .collect(Collectors.toList());
-
-    return new StudentDetail(student, studentCourseList, applicationStatusList);
   }
 
 
@@ -101,6 +102,40 @@ public class StudentService {
   }
 
   /**
+   * 受講生コース情報を登録します。 受講生コース情報には受講生情報を紐づけるための値や日付情報を設定します。 受講生コース情報を登録すると共に、受講状況を仮申込で登録します。
+   *
+   * @param studentCourse 受講生コース情報
+   */
+  @Transactional
+  public StudentCourse registerStudentCourse(String nameId, StudentCourse studentCourse) {
+    List<ApplicationStatus> applicationStatusList = new ArrayList<>();
+
+    Optional<Student> studentOptional = repository.findByNameId(nameId);
+    if (studentOptional.isEmpty()) {
+      throw new ResourceNotFoundException("入力されたIDは存在しません: " + nameId);
+    }
+
+    Student student = studentOptional.get();
+
+    boolean isAlreadyRegistered = repository.isStudentRegisteredForCourse(nameId,
+        studentCourse.getCourseName());
+    if (isAlreadyRegistered) {
+      throw new IllegalStateException(
+          "このコースには既に申し込んでいます: " + studentCourse.getCourseName());
+    }
+
+    initStudentCourse(studentCourse, student);
+    repository.registerStudentCourse(studentCourse);
+
+    String courseId = studentCourse.getCourseId();
+    repository.registerApplicationStatus(courseId, student.getNameId());
+    applicationStatusList.add(new ApplicationStatus(courseId, student.getNameId(), "仮申込"));
+
+    return studentCourse;
+  }
+
+
+  /**
    * 受講生コース情報を登録する際の初期情報を設定します。
    *
    * @param studentCourse 受講生コース情報
@@ -123,12 +158,7 @@ public class StudentService {
   public StudentDetail updateStudent(StudentDetail studentDetail) {
     String nameId = studentDetail.getStudent().getNameId();
 
-    if (nameId == null) {
-      throw new ResourceNotFoundException("入力されたIDは存在しません: " + nameId);
-
-    }
     Optional<Student> existingStudent = repository.findByNameId(nameId);
-
     if (existingStudent.isEmpty()) {
       throw new ResourceNotFoundException("入力されたIDは存在しません: " + nameId);
     } else {
@@ -151,16 +181,18 @@ public class StudentService {
    * @param nameId 受講生ID
    */
   public void deleteStudent(String nameId) {
-    if (nameId == null) {
+    Optional<Student> existingStudent = repository.findByNameId(nameId);
+    if (existingStudent.isEmpty()) {
       throw new ResourceNotFoundException("入力されたIDは存在しません: " + nameId);
+    } else {
+      repository.deleteStudent(nameId);
+      List<StudentCourse> studentCourseList = repository.searchStudentCourseList(nameId);
+      studentCourseList.forEach(studentCourse -> {
+        String courseId = studentCourse.getCourseId();
+        repository.deleteStudentCourse(courseId);
+        repository.deleteApplicationStatus(courseId);
+      });
     }
-    repository.deleteStudent(nameId);
-    List<StudentCourse> studentCourseList = repository.searchStudentCourseList(nameId);
-    studentCourseList.forEach(studentCourse -> {
-      String courseId = studentCourse.getCourseId();
-      repository.deleteStudentCourse(courseId);
-      repository.deleteApplicationStatus(courseId);
-    });
   }
 
   /**
@@ -169,7 +201,8 @@ public class StudentService {
    * @param courseId コースID
    */
   public void deleteStudentCourse(String courseId) {
-    if (courseId == null) {
+    Optional<StudentCourse> studentCourseOptional = repository.findByCourseId(courseId);
+    if (studentCourseOptional.isEmpty()) {
       throw new ResourceNotFoundException("入力されたコースIDは存在しません: " + courseId);
     }
     repository.deleteStudentCourse(courseId);
