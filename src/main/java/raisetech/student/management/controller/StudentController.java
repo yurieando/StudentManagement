@@ -48,10 +48,10 @@ public class StudentController {
   }
 
   @Operation(summary = "IDによる受講生検索", description = "受講生をIDから個別検索します。")
-  @GetMapping("/student/{nameId}")
+  @GetMapping("/student/{studentId}")
   public StudentDetail getStudent(
-      @PathVariable @NotBlank String nameId) {
-    return service.searchStudent(nameId);
+      @PathVariable @NotBlank String studentId) {
+    return service.searchStudent(studentId);
   }
 
 
@@ -64,13 +64,13 @@ public class StudentController {
   }
 
   @Operation(summary = "受講生コース情報の新規登録", description = "受講生コース情報を新しく登録します。")
-  @PostMapping("/registerStudentCourse/{nameId}")
+  @PostMapping("/registerStudentCourse/{studentId}")
   public ResponseEntity<StudentCourse> registerStudentCourse(
-      @PathVariable @NotBlank String nameId,
+      @PathVariable @NotBlank String studentId,
       @RequestBody @Valid CourseRegistration request) {
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setCourseName(request.getCourseName());
-    StudentCourse registeredStudentCourse = service.registerStudentCourse(nameId, studentCourse);
+    StudentCourse registeredStudentCourse = service.registerStudentCourse(studentId, studentCourse);
     return ResponseEntity.ok(registeredStudentCourse);
   }
 
@@ -82,9 +82,9 @@ public class StudentController {
   }
 
   @Operation(summary = "受講生詳細の削除", description = "受講生詳細を削除します。")
-  @DeleteMapping("/deleteStudent/{nameId}")
-  public ResponseEntity<String> deleteStudent(@PathVariable @NotBlank String nameId) {
-    service.deleteStudent(nameId);
+  @DeleteMapping("/deleteStudent/{studentId}")
+  public ResponseEntity<String> deleteStudent(@PathVariable @NotBlank String studentId) {
+    service.deleteStudent(studentId);
     return ResponseEntity.status(HttpStatus.OK).body("削除処理が成功しました。");
   }
 
@@ -106,5 +106,4 @@ public class StudentController {
   public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
   }
-
 }

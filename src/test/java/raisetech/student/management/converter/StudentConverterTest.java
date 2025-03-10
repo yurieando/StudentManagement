@@ -65,7 +65,7 @@ public class StudentConverterTest {
   }
 
   @Test
-  void 生徒情報とnameIdが紐づかないコース情報はリストから除外されること() {
+  void 生徒情報とstudentIdが紐づかないコース情報はリストから除外されること() {
     List<Student> studentList = new ArrayList<>();
     Student testStudent = new Student("1", "テスト名", "テストフリガナ", "テストニックネーム"
         , "test@email.com", "東京", 20, "男性", "", false);
@@ -95,6 +95,7 @@ public class StudentConverterTest {
     List<StudentDetail> actual = sut.convertStudentDetails(studentList, studentCourseList,
         applicationStatusList);
 
-    assertEquals(expectedStudentDetails, actual, "nameIdが紐づかないコースが除外されていません。");
+    assertEquals(expectedStudentDetails, actual,
+        "studentIdが紐づかないコースが除外されていません。");
   }
 }

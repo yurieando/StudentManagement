@@ -10,12 +10,12 @@ import lombok.Setter;
 public class ApplicationStatus {
 
   private String courseId;
-  private String nameId;
+  private String studentId;
   private String applicationStatus;
 
-  public ApplicationStatus(String courseId, String nameId, String applicationStatus) {
+  public ApplicationStatus(String courseId, String studentId, String applicationStatus) {
     this.courseId = courseId;
-    this.nameId = nameId;
+    this.studentId = studentId;
     this.applicationStatus = applicationStatus;
   }
 

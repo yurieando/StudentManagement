@@ -46,20 +46,20 @@ public interface StudentRepository {
   /**
    * 個別の受講生情報の検索です。 IDに紐づく任意の受講生の情報を取得します。
    *
-   * @param nameId 受講生ID
+   * @param studentId 受講生ID
    * @return 受講生情報
    */
-  @Select("SELECT * FROM students WHERE name_id = #{nameId}")
-  Student searchStudent(String nameId);
+  @Select("SELECT * FROM students WHERE student_id = #{studentId}")
+  Student searchStudent(String studentId);
 
   /**
    * 受講生IDに紐づく受講生コース情報を検索します。
    *
-   * @param nameId 受講生ID
+   * @param studentId 受講生ID
    * @return 受講生IDに紐づく受講生コース情報
    */
-  @Select("SELECT * FROM student_courses WHERE name_id = #{nameId}")
-  List<StudentCourse> searchStudentCourseList(String nameId);
+  @Select("SELECT * FROM student_courses WHERE student_id = #{studentId}")
+  List<StudentCourse> searchStudentCourseList(String studentId);
 
   /**
    * コースIDに紐づく受講状況を検索します。
@@ -79,7 +79,7 @@ public interface StudentRepository {
       "INSERT INTO students(name, furigana, nickname, mail_address, address, age, gender, remark, is_deleted) "
           + "VALUES(#{name}, #{furigana}, #{nickname}, #{mailAddress}, #{address}, #{age}, #{gender}, #{remark}, false)")
 
-  @Options(useGeneratedKeys = true, keyProperty = "nameId")
+  @Options(useGeneratedKeys = true, keyProperty = "studentId")
   void registerStudent(Student student);
 
   /**
@@ -88,8 +88,8 @@ public interface StudentRepository {
    * @param studentCourse 受講生コース情報
    */
 
-  @Insert("INSERT INTO student_courses(name_id, course_name, start_date, deadline)"
-      + "VALUES(#{nameId}, #{courseName}, #{startDate}, #{deadline})")
+  @Insert("INSERT INTO student_courses(student_id, course_name, start_date, deadline)"
+      + "VALUES(#{studentId}, #{courseName}, #{startDate}, #{deadline})")
 
   @Options(useGeneratedKeys = true, keyProperty = "courseId")
   void registerStudentCourse(StudentCourse studentCourse);
@@ -97,12 +97,12 @@ public interface StudentRepository {
   /**
    * 受講状況を新規登録します。受講生コース情報の新規登録と共に仮申込を登録します。
    *
-   * @param courseId コースID
-   * @param nameId   受講生ID
+   * @param courseId  コースID
+   * @param studentId 受講生ID
    */
-  @Insert("INSERT INTO application_status(course_id, name_id, application_status) VALUES(#{courseId}, #{nameId}, '仮申込')")
+  @Insert("INSERT INTO application_status(course_id, student_id, application_status) VALUES(#{courseId}, #{studentId}, '仮申込')")
   void registerApplicationStatus(@Param("courseId") String courseId,
-      @Param("nameId") String nameId);
+      @Param("studentId") String studentId);
 
 
   /**
@@ -112,7 +112,7 @@ public interface StudentRepository {
    */
   @Update(
       "UPDATE students SET name = #{name}, furigana = #{furigana}, nickname = #{nickname}, mail_address = #{mailAddress},"
-          + " address = #{address}, age = #{age}, gender = #{gender}, remark = #{remark}, is_deleted = #{isDeleted} WHERE name_id = #{nameId}")
+          + " address = #{address}, age = #{age}, gender = #{gender}, remark = #{remark}, is_deleted = #{isDeleted} WHERE student_id = #{studentId}")
   void updateStudent(Student student);
 
 
@@ -121,7 +121,7 @@ public interface StudentRepository {
    *
    * @param studentCourse 受講生コース
    */
-  @Update("UPDATE student_courses SET course_name = #{courseName} WHERE name_id = #{nameId}")
+  @Update("UPDATE student_courses SET course_name = #{courseName} WHERE student_id = #{studentId}")
   void updateStudentCourse(StudentCourse studentCourse);
 
 
@@ -136,10 +136,10 @@ public interface StudentRepository {
   /**
    * 受講生情報を削除します
    *
-   * @param nameId 受講生ID
+   * @param studentId 受講生ID
    */
-  @Delete("DELETE FROM students WHERE name_id = #{nameId}")
-  void deleteStudent(@Param("nameId") String nameId);
+  @Delete("DELETE FROM students WHERE student_id = #{studentId}")
+  void deleteStudent(@Param("studentId") String studentId);
 
   /**
    * 受講生コース情報を削除します
@@ -161,11 +161,11 @@ public interface StudentRepository {
   /**
    * 受講生情報が存在するか確認します
    *
-   * @param nameId 受講生ID
+   * @param studentId 受講生ID
    * @return 受講生情報
    */
-  @Select("SELECT * FROM students WHERE name_id = #{nameId}")
-  Optional<Student> findByNameId(@Param("nameId") String nameId);
+  @Select("SELECT * FROM students WHERE student_id = #{studentId}")
+  Optional<Student> findByStudentId(@Param("studentId") String studentId);
 
   /**
    * 受講生コース情報が存在するか確認します
@@ -176,14 +176,11 @@ public interface StudentRepository {
   @Select("SELECT * FROM student_courses WHERE course_id = #{courseId}")
   Optional<StudentCourse> findByCourseId(@Param("courseId") String courseId);
 
-  @Select("SELECT COUNT(*) FROM student_courses WHERE name_id = #{nameId} AND course_name = #{courseName}")
-  int countStudentCourseRegistrations(@Param("nameId") String nameId,
+  @Select("SELECT COUNT(*) FROM student_courses WHERE student_id = #{studentId} AND course_name = #{courseName}")
+  int countStudentCourseRegistrations(@Param("studentId") String studentId,
       @Param("courseName") String courseName);
 
-  default boolean isStudentRegisteredForCourse(String nameId, String courseName) {
-    return countStudentCourseRegistrations(nameId, courseName) > 0;
+  default boolean isStudentRegisteredForCourse(String studentId, String courseName) {
+    return countStudentCourseRegistrations(studentId, courseName) > 0;
   }
-
-  ;
 }
-

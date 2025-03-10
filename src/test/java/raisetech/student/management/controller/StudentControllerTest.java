@@ -64,25 +64,25 @@ class StudentControllerTest {
 
   @Test
   void 受講生詳細検索_正常系_受講生詳細の検索が実行できて空で返ってくること() throws Exception {
-    String nameId = "テストID";
-    mockMvc.perform(get("/student/{nameId}", nameId))
+    String studentId = "テストID";
+    mockMvc.perform(get("/student/{studentId}", studentId))
         .andExpect(status().isOk());
 
-    verify(service, times(1)).searchStudent(nameId);
+    verify(service, times(1)).searchStudent(studentId);
   }
 
   @Test
   void 受講生詳細検索_異常系_存在しないIDを指定した場合エラーが表示されること() throws Exception {
-    String invalidNameId = "0";
-    doThrow(new ResourceNotFoundException("入力されたIDは存在しません: " + invalidNameId))
-        .when(service).searchStudent(invalidNameId);
+    String invalidStudentId = "0";
+    doThrow(new ResourceNotFoundException("入力されたIDは存在しません: " + invalidStudentId))
+        .when(service).searchStudent(invalidStudentId);
 
-    mockMvc.perform(get("/student/{nameId}", invalidNameId))
+    mockMvc.perform(get("/student/{studentId}", invalidStudentId))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.message").value(
-            "入力されたIDは存在しません: " + invalidNameId));
+            "入力されたIDは存在しません: " + invalidStudentId));
 
-    verify(service, times(1)).searchStudent(invalidNameId);
+    verify(service, times(1)).searchStudent(invalidStudentId);
   }
 
   @Test
@@ -220,37 +220,37 @@ class StudentControllerTest {
         }
         """;
 
-    String nameId = "999";
+    String studentId = "999";
 
-    mockMvc.perform(post("/registerStudentCourse/{nameId}", nameId)
+    mockMvc.perform(post("/registerStudentCourse/{studentId}", studentId)
             .contentType(MediaType.APPLICATION_JSON)
             .content(requestBody))
         .andExpect(status().isOk());
 
-    verify(service, times(1)).registerStudentCourse(eq(nameId), any());
+    verify(service, times(1)).registerStudentCourse(eq(studentId), any());
   }
 
   @Test
   void 受講生コース情報登録_重複申し込みの場合にエラーが返されること() throws Exception {
-    String nameId = "999";
+    String studentId = "999";
     String requestBody = """
         {
             "courseName": "Java"
         }
         """;
 
-    when(repository.isStudentRegisteredForCourse(eq(nameId), eq("Java"))).thenReturn(true);
+    when(repository.isStudentRegisteredForCourse(eq(studentId), eq("Java"))).thenReturn(true);
 
     doThrow(new IllegalStateException("このコースには既に申し込んでいます: Java"))
-        .when(service).registerStudentCourse(eq(nameId), any());
+        .when(service).registerStudentCourse(eq(studentId), any());
 
-    mockMvc.perform(post("/registerStudentCourse/{nameId}", nameId)
+    mockMvc.perform(post("/registerStudentCourse/{studentId}", studentId)
             .contentType(MediaType.APPLICATION_JSON)
             .content(requestBody))
         .andExpect(status().isBadRequest())
         .andExpect(content().string("このコースには既に申し込んでいます: Java"));  // エラーメッセージの確認
 
-    verify(service, times(1)).registerStudentCourse(eq(nameId), any());
+    verify(service, times(1)).registerStudentCourse(eq(studentId), any());
   }
 
   @Test
@@ -269,8 +269,8 @@ class StudentControllerTest {
             },
             "studentCourseList": [
                 {
-                    "courseId" : "99",
-                    "nameId" : "99",
+                    "courseId" : "テストコースID",
+                    "studentId" : "テストID",
                     "courseName": "Java",
                     "startDate" : "2024-01-01T11:11:11.123456",
                     "deadline" : "2024-01-01T11:11:11.123456"
@@ -279,8 +279,8 @@ class StudentControllerTest {
             ,
             "applicationStatusList": [
                         {
-                            "courseId": "99",
-                            "nameId": "99",
+                            "courseId": "テストコースID",
+                            "studentId": "テストID",
                             "applicationStatus": "受講中"
                         }
                     ]
@@ -297,25 +297,25 @@ class StudentControllerTest {
 
   @Test
   void 受講生詳細削除_正常系_IDが正しい場合に正常に削除が実行できること() throws Exception {
-    String nameId = "テストID";
-    mockMvc.perform(delete("/deleteStudent/{nameId}", nameId))
+    String studentId = "テストID";
+    mockMvc.perform(delete("/deleteStudent/{studentId}", studentId))
         .andExpect(status().isOk());
 
-    verify(service, times(1)).deleteStudent(nameId);
+    verify(service, times(1)).deleteStudent(studentId);
   }
 
   @Test
   void 受講生詳細削除_異常系_IDが存在しない場合にエラーが表示されること() throws Exception {
-    String invalidNameId = "0";
-    doThrow(new ResourceNotFoundException("入力されたIDは存在しません: " + invalidNameId))
-        .when(service).deleteStudent(invalidNameId);
+    String invalidStudentId = "0";
+    doThrow(new ResourceNotFoundException("入力されたIDは存在しません: " + invalidStudentId))
+        .when(service).deleteStudent(invalidStudentId);
 
-    mockMvc.perform(delete("/deleteStudent/{nameId}", invalidNameId))
+    mockMvc.perform(delete("/deleteStudent/{studentId}", invalidStudentId))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.message").value(
-            "入力されたIDは存在しません: " + invalidNameId));
+            "入力されたIDは存在しません: " + invalidStudentId));
 
-    verify(service, times(1)).deleteStudent(invalidNameId);
+    verify(service, times(1)).deleteStudent(invalidStudentId);
 
   }
 
@@ -342,5 +342,3 @@ class StudentControllerTest {
     verify(service, times(1)).deleteStudentCourse(invalidCourseId);
   }
 }
-
-

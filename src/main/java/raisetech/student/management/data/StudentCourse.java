@@ -17,7 +17,7 @@ import lombok.Setter;
 public class StudentCourse {
 
   private String courseId;
-  private String nameId;
+  private String studentId;
   private String courseName;
   private LocalDate startDate;
   private LocalDate deadline;
