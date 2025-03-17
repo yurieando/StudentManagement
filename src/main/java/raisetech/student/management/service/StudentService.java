@@ -57,19 +57,19 @@ public class StudentService {
     Optional<Student> existingStudent = repository.findByStudentId(studentId);
     if (existingStudent.isEmpty()) {
       throw new ResourceNotFoundException("入力されたIDは存在しません: " + studentId);
-    } else {
-      List<StudentCourse> studentCourseList = repository.searchStudentCourseList(
-          student.getStudentId());
-      List<String> courseIdList = studentCourseList.stream()
-          .map(StudentCourse::getCourseId)
-          .collect(Collectors.toList());
-
-      List<ApplicationStatus> applicationStatusList = courseIdList.stream()
-          .flatMap(courseId -> repository.searchApplicationStatusList(courseId).stream())
-          .collect(Collectors.toList());
-
-      return new StudentDetail(student, studentCourseList, applicationStatusList);
     }
+
+    List<StudentCourse> studentCourseList = repository.searchStudentCourseList(
+        student.getStudentId());
+    List<String> courseIdList = studentCourseList.stream()
+        .map(StudentCourse::getCourseId)
+        .collect(Collectors.toList());
+
+    List<ApplicationStatus> applicationStatusList = courseIdList.stream()
+        .flatMap(courseId -> repository.searchApplicationStatusList(courseId).stream())
+        .collect(Collectors.toList());
+
+    return new StudentDetail(student, studentCourseList, applicationStatusList);
   }
 
   /**
@@ -159,18 +159,17 @@ public class StudentService {
     Optional<Student> existingStudent = repository.findByStudentId(studentId);
     if (existingStudent.isEmpty()) {
       throw new ResourceNotFoundException("入力されたIDは存在しません: " + studentId);
-    } else {
-      repository.updateStudent(studentDetail.getStudent());
-
-      studentDetail.getStudentCourseList().forEach(studentCourse -> {
-        repository.updateStudentCourse(studentCourse);
-      });
-      studentDetail.getApplicationStatusList().forEach(applicationStatus -> {
-        repository.updateApplicationStatus(applicationStatus);
-      });
-
-      return studentDetail;
     }
+    repository.updateStudent(studentDetail.getStudent());
+
+    studentDetail.getStudentCourseList().forEach(studentCourse -> {
+      repository.updateStudentCourse(studentCourse);
+    });
+    studentDetail.getApplicationStatusList().forEach(applicationStatus -> {
+      repository.updateApplicationStatus(applicationStatus);
+    });
+
+    return studentDetail;
   }
 
   /**
@@ -178,19 +177,19 @@ public class StudentService {
    *
    * @param studentId 受講生ID
    */
+  @Transactional
   public void deleteStudent(String studentId) {
     Optional<Student> existingStudent = repository.findByStudentId(studentId);
     if (existingStudent.isEmpty()) {
       throw new ResourceNotFoundException("入力されたIDは存在しません: " + studentId);
-    } else {
-      repository.deleteStudent(studentId);
-      List<StudentCourse> studentCourseList = repository.searchStudentCourseList(studentId);
-      studentCourseList.forEach(studentCourse -> {
-        String courseId = studentCourse.getCourseId();
-        repository.deleteStudentCourse(courseId);
-        repository.deleteApplicationStatus(courseId);
-      });
     }
+    repository.deleteStudent(studentId);
+    List<StudentCourse> studentCourseList = repository.searchStudentCourseList(studentId);
+    studentCourseList.forEach(studentCourse -> {
+      String courseId = studentCourse.getCourseId();
+      repository.deleteStudentCourse(courseId);
+      repository.deleteApplicationStatus(courseId);
+    });
   }
 
   /**
@@ -198,6 +197,7 @@ public class StudentService {
    *
    * @param courseId コースID
    */
+  @Transactional
   public void deleteStudentCourse(String courseId) {
     Optional<StudentCourse> studentCourseOptional = repository.findByCourseId(courseId);
     if (studentCourseOptional.isEmpty()) {
