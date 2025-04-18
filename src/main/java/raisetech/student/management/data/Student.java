@@ -1,7 +1,6 @@
 package raisetech.student.management.data;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +14,7 @@ import lombok.Setter;
 @Setter
 public class Student {
 
-  private String nameId;
+  private String studentId;
 
   @NotBlank(message = "入力必須です。")
   private String name;
@@ -42,9 +41,10 @@ public class Student {
   private String remark;
   private boolean isDeleted;
 
-  public Student(String nameId, String name, String furigana, String nickname, String mailAddress,
+  public Student(String studentId, String name, String furigana, String nickname,
+      String mailAddress,
       String address, int age, String gender, String remark, boolean isDeleted) {
-    this.nameId = nameId;
+    this.studentId = studentId;
     this.name = name;
     this.furigana = furigana;
     this.nickname = nickname;
@@ -68,7 +68,7 @@ public class Student {
 
     Student student = (Student) other;
     return age == student.age &&
-        Objects.equals(nameId, student.nameId) &&
+        Objects.equals(studentId, student.studentId) &&
         Objects.equals(name, student.name) &&
         Objects.equals(furigana, student.furigana) &&
         Objects.equals(nickname, student.nickname) &&
@@ -80,7 +80,7 @@ public class Student {
 
   @Override
   public int hashCode() {
-    return Objects.hash(nameId, name, furigana, nickname, mailAddress, address, age, gender,
+    return Objects.hash(studentId, name, furigana, nickname, mailAddress, address, age, gender,
         remark);
   }
 

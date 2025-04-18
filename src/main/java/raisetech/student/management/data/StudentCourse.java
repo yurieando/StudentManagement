@@ -3,28 +3,25 @@ package raisetech.student.management.data;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Objects;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Schema(description = "受講生コース情報")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+
 public class StudentCourse {
 
   private String courseId;
-  private String nameId;
-  private String course;
+  private String studentId;
+  private String courseName;
   private LocalDate startDate;
   private LocalDate deadline;
 
-  public StudentCourse(String courseId, String nameId, String course, LocalDate startDate,
-      LocalDate deadline) {
-    this.courseId = courseId;
-    this.nameId = nameId;
-    this.course = course;
-    this.startDate = startDate;
-    this.deadline = deadline;
-  }
 
   @Override
   public boolean equals(Object other) {
@@ -35,11 +32,11 @@ public class StudentCourse {
       return false;
     }
     StudentCourse that = (StudentCourse) other;
-    return Objects.equals(course, that.course);
+    return Objects.equals(courseName, that.courseName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(course);
+    return Objects.hash(courseName);
   }
 }
